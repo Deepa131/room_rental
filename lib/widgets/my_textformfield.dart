@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class MyTextformfield extends StatelessWidget {
   const MyTextformfield({
+    super.key, 
     required this.controller, required this.labelText, required this.hintText});
 
   final TextEditingController controller;
