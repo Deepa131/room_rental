@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-import 'package:room_rental/screens/onboardingone_screen.dart';
-=======
-import 'package:room_rental/screens/signup_screen.dart';
->>>>>>> feature/auth
+import 'package:room_rental/screens/splash_screen.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -11,12 +7,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-<<<<<<< HEAD
-    home: OnboardingOneScreen(),
-=======
-    home: SignupScreen(),
-
->>>>>>> feature/auth
+    home: SplashScreen(),
     );
   }
 }

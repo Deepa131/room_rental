@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:room_rental/screens/onboardingone_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -16,9 +17,16 @@ class _SplashScreenState extends State<SplashScreen> {
 
     //Auto navigate after 2 seconds
     Timer(const Duration(seconds: 2), () {
-      Navigator.pushReplacementNamed(context, '/onboarding');
+       Navigator.push(
+                    context, 
+                    MaterialPageRoute(
+                      builder: (context) =>
+                      const OnboardingOneScreen(),
+                    ),
+                  );
     });
   }
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 179, 200, 210),
