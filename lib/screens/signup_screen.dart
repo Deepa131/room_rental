@@ -5,7 +5,9 @@ import '../widgets/my_textformfield.dart';
 import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+  final String userRole;
+
+  const SignupScreen({super.key, required this.userRole});
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -70,7 +72,8 @@ class _SignupScreenState extends State<SignupScreen> {
       }
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        MaterialPageRoute(
+          builder: (context) => LoginScreen(userRole: widget.userRole)),
       );
     });
   }
@@ -88,10 +91,12 @@ class _SignupScreenState extends State<SignupScreen> {
             children: [
               SizedBox(height: height * 0.03),
 
-              Center(
+              Container(
+                color: const Color.fromARGB(255, 167, 197, 221),
+                height: 200,
+                width: double.infinity,
                 child: Image.asset(
                   "assets/images/image3.jpg",
-                  height: height * 0.15,
                 ),
               ),
 
@@ -125,35 +130,35 @@ class _SignupScreenState extends State<SignupScreen> {
                     MyTextformfield(
                       controller: fullNameController,
                       labelText: "Enter full name",
-                      hintText: "Full Name",
+                      hintText: "Full Name", isPassword: false,
                     ),
                     const SizedBox(height: 16),
 
                     MyTextformfield(
                       controller: phoneController,
                       labelText: "Phone Number",
-                      hintText: "98XXXXXXXX",
+                      hintText: "98XXXXXXXX", isPassword: false,
                     ),
                     const SizedBox(height: 16),
 
                     MyTextformfield(
                       controller: emailController,
                       labelText: "Email",
-                      hintText: "example@gmail.com",
+                      hintText: "example@gmail.com", isPassword: false,
                     ),
                     const SizedBox(height: 16),
 
                     MyTextformfield(
                       controller: passwordController,
                       labelText: "Password",
-                      hintText: "******",
+                      hintText: "******", isPassword: true,
                     ),
                     const SizedBox(height: 16),
 
                     MyTextformfield(
                       controller: confirmPasswordController,
                       labelText: "Confirm password",
-                      hintText: "******",
+                      hintText: "******", isPassword: true,
                     ),
                     const SizedBox(height: 24),
 
@@ -176,10 +181,10 @@ class _SignupScreenState extends State<SignupScreen> {
                   const Text("Already have an account?"),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const LoginScreen()),
+                      Navigator.push(context, 
+                      MaterialPageRoute(
+                        builder: (context) => LoginScreen(userRole: widget.userRole),
+                        ),
                       );
                     },
                     child: const Text(

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class MyTextformfield extends StatelessWidget {
   const MyTextformfield({
     super.key, 
-    required this.controller, required this.labelText, required this.hintText});
+    required this.controller, required this.labelText, required this.hintText, required bool isPassword});
 
   final TextEditingController controller;
   final String labelText;
