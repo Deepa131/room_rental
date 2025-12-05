@@ -135,8 +135,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           MyTextformfield(
                             controller: nameController,
-                            labelText: "Username",
-                            hintText: "Enter your username",
+                            labelText: "Email",
+                            hintText: "Enter your email",
                             isPassword: false,
                           ),
 
