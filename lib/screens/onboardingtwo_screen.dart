@@ -13,82 +13,77 @@ class _OnboardingtwoScreenState extends State<OnboardingtwoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFD7E4E7),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  height: 120,
-                  width: 120,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF94BDC4),
-                    borderRadius: BorderRadius.circular(15),
+      body: Stack(
+        children: [
+          // Background image (optional)
+          SizedBox.expand(
+            child: Image.asset(
+              "assets/images/image2_background.png", // add a background image for consistency
+              fit: BoxFit.cover,
+            ),
+          ),
+
+          // Dark overlay for readability
+          Container(
+            color: Colors.black.withOpacity(0.15),
+          ),
+
+          // Main content
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end, // positions content at bottom
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Icon stack
+                  Stack(
+                    alignment: Alignment.center,
                   ),
-                  child: const Icon(
-                    Icons.home_outlined,
-                    size: 60,
-                    color: Colors.black87,
-                  ),
-                ),
-                Positioned(
-                  right: -5,
-                  bottom: -5,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(width: 2, color: Colors.black87),
+
+                  const SizedBox(height: 32),
+
+                  const Text(
+                    "RentEasy",
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
                       color: Colors.white,
-                    ),
-                    child: const Icon(Icons.location_on,
-                    size: 30,
-                    color: Colors.blue,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 30),
+                  const SizedBox(height: 12),
 
-            const Text(
-              "RentEasy",
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-
-            const Text(
-              "Find your perfect room in Nepal",
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 80),
-
-            MyButton(
-              text: "Get Started",
-              color: Colors.blue.shade800,
-              onPressed: () {
-                Navigator.push(
-                  context, 
-                  MaterialPageRoute(
-                    builder: (context) =>
-                    const OnboardingthreeScreen(),
+                  const Text(
+                    "Find your perfect room in Nepal",
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white70,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                );
-              },
+
+                  const SizedBox(height: 30),
+
+                  MyButton(
+                    text: "Get Started",
+                    color: Colors.blueAccent,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const OnboardingthreeScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 40), 
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

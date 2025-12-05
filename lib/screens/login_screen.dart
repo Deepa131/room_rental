@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:room_rental/common/my_snackbar.dart';
 import 'package:room_rental/widgets/my_button.dart';
@@ -16,7 +17,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  bool rememberMe = false;
 
   void loginUser() {
     if (nameController.text.isEmpty || passwordController.text.isEmpty) {
@@ -42,97 +42,164 @@ class _LoginScreenState extends State<LoginScreen> {
       message: "Login Successful!",
       color: Colors.green,
     );
-
-    Future.delayed(const Duration(seconds: 1), () {
-      if (!mounted) return;
-
-      // if (widget.userRole == "owner") {
-      //   Navigator.pushReplacement(
-      //     context,
-      //     MaterialPageRoute(builder: (context) => const OwnerHome()),
-      //   );
-      // } else {
-      //   Navigator.pushReplacement(
-      //     context,
-      //     MaterialPageRoute(builder: (context) => const RenterHome()),
-      //   );
-      // }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffdfe8ec),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Image.asset("assets/images/image3.jpg", height: 140, width: 500),
-              const SizedBox(height: 20),
+      body: Stack(
+        children: [
+          /// 🌆 Background Image
+          SizedBox.expand(
+            child: Image.asset(
+              "assets/images/onboarding_bg3.png",
+              fit: BoxFit.cover,
+            ),
+          ),
 
-              const Text(
-                "Login",
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-              ),
+          /// 🌒 Dark Overlay
+          Container(
+            color: Colors.black.withOpacity(0.40),
+          ),
 
-              const SizedBox(height: 20),
-
-              MyTextformfield(
-                controller: nameController,
-                labelText: "Enter your name",
-                hintText: "Enter your name", 
-                isPassword: false,
-              ),
-
-              const SizedBox(height: 18),
-
-              MyTextformfield(
-                controller: passwordController,
-                labelText: "Enter your password",
-                hintText: "Password",
-                isPassword: true,
-              ),
-
-              const SizedBox(height: 10),
-
-              MyButton(
-                text: "Log In",
-                color: const Color(0xff2e3e87),
-                onPressed: loginUser,
-              ),
-
-              const SizedBox(height: 18),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Don't have an account? "),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              SignupScreen(userRole: widget.userRole),
+          /// 🔥 Main Content with Glassmorphism
+          SafeArea(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(25),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(28),
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 238, 237, 237),
+                        borderRadius: BorderRadius.circular(25),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.2),
+                          width: 1.2,
                         ),
-                      );
-                    },
-                    child: const Text(
-                      "Sign Up",
-                      style: TextStyle(
-                        color: Colors.pink,
-                        fontWeight: FontWeight.bold,
+                      ),
+
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                         
+                          Text(
+                            "RentEasy",
+                            style: TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.4,
+                              color: Colors.blue,
+                              shadows: [
+                                Shadow(
+                                  offset: const Offset(0, 3),
+                                  blurRadius: 12,
+                                  color: Colors.black.withOpacity(0.5),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          /// ✨ Welcome Title
+                          const Text(
+                            "Welcome Back",
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.blue,
+                            ),
+                          ),
+
+                          const SizedBox(height: 6),
+
+                          /// 🎭 Show Role
+                          Text(
+                            "Login as ${widget.userRole.toUpperCase()}",
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: Colors.blue.shade700,
+                            ),
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          /// 🧑 Username
+                          MyTextformfield(
+                            controller: nameController,
+                            labelText: "Username",
+                            hintText: "Enter your username",
+                            isPassword: false,
+                          ),
+
+                          const SizedBox(height: 18),
+
+                          /// 🔒 Password
+                          MyTextformfield(
+                            controller: passwordController,
+                            labelText: "Password",
+                            hintText: "Enter your password",
+                            isPassword: true,
+                          ),
+
+                          const SizedBox(height: 28),
+
+                          /// 🔵 Login Button
+                          MyButton(
+                            text: "Log In",
+                            color: Colors.blue.shade700,
+                            onPressed: loginUser,
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          /// ➕ Create Account
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Don't have an account? ",
+                                style: TextStyle(
+                                  color: Colors.black,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          SignupScreen(userRole: widget.userRole),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  "Sign Up",
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 8),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              )
-            ],
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

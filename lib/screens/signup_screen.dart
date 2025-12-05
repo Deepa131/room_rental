@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../common/my_snackbar.dart';
 import '../widgets/my_button.dart';
@@ -14,14 +15,12 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  // controllers
   final fullNameController = TextEditingController();
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  // validation function
   void handleSignup() {
     String fullName = fullNameController.text.trim();
     String phone = phoneController.text.trim();
@@ -67,138 +66,185 @@ class _SignupScreenState extends State<SignupScreen> {
     );
 
     Future.delayed(const Duration(seconds: 1), () {
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => LoginScreen(userRole: widget.userRole)),
+          builder: (context) => LoginScreen(userRole: widget.userRole),
+        ),
       );
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final height = MediaQuery.of(context).size.height;
-
     return Scaffold(
-      backgroundColor: const Color(0xffe5eef0),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Column(
-            children: [
-              SizedBox(height: height * 0.03),
+      body: Stack(
+        children: [
+          SizedBox.expand(
+            child: Image.asset(
+              "assets/images/onboarding_bg3.png",
+              fit: BoxFit.cover,
+            ),
+          ),
 
-              Container(
-                color: const Color.fromARGB(255, 167, 197, 221),
-                height: 200,
-                width: double.infinity,
-                child: Image.asset(
-                  "assets/images/image3.jpg",
-                ),
-              ),
+          Container(
+            color: Colors.black.withOpacity(0.40),
+          ),
 
-              const SizedBox(height: 10),
-
-              const Text(
-                "Create Your Account",
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    MyTextformfield(
-                      controller: fullNameController,
-                      labelText: "Enter full name",
-                      hintText: "Full Name", isPassword: false,
-                    ),
-                    const SizedBox(height: 16),
-
-                    MyTextformfield(
-                      controller: phoneController,
-                      labelText: "Phone Number",
-                      hintText: "98XXXXXXXX", isPassword: false,
-                    ),
-                    const SizedBox(height: 16),
-
-                    MyTextformfield(
-                      controller: emailController,
-                      labelText: "Email",
-                      hintText: "example@gmail.com", isPassword: false,
-                    ),
-                    const SizedBox(height: 16),
-
-                    MyTextformfield(
-                      controller: passwordController,
-                      labelText: "Password",
-                      hintText: "******", isPassword: true,
-                    ),
-                    const SizedBox(height: 16),
-
-                    MyTextformfield(
-                      controller: confirmPasswordController,
-                      labelText: "Confirm password",
-                      hintText: "******", isPassword: true,
-                    ),
-                    const SizedBox(height: 24),
-
-                    MyButton(
-                      text: "Sign Up",
-                      onPressed: handleSignup,
-                      color: const Color(0xff24479a),
-                    ),
-
-                    const SizedBox(height: 12),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 15),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Already have an account?"),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(context, 
-                      MaterialPageRoute(
-                        builder: (context) => LoginScreen(userRole: widget.userRole),
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(25),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: Container(
+                      padding: const EdgeInsets.all(28),
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 238, 237, 237),
+                        borderRadius: BorderRadius.circular(25),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.2),
+                          width: 1.2,
                         ),
-                      );
-                    },
-                    child: const Text(
-                      " Login",
-                      style: TextStyle(color: Colors.red),
+                      ),
+
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "RentEasy",
+                            style: TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                              letterSpacing: 1.4,
+                              shadows: [
+                                Shadow(
+                                  offset: Offset(0, 3),
+                                  blurRadius: 12,
+                                  color: Colors.black.withOpacity(0.5),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 14),
+
+                          const Text(
+                            "Create Your Account",
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.blue,
+                            ),
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          Text(
+                            "Signup as ${widget.userRole.toUpperCase()}",
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: Colors.blue,
+                            ),
+                          ),
+
+                          const SizedBox(height: 30),
+
+                          MyTextformfield(
+                            controller: fullNameController,
+                            labelText: "Full Name",
+                            hintText: "Enter full name",
+                            isPassword: false,
+                          ),
+                          const SizedBox(height: 16),
+
+                          MyTextformfield(
+                            controller: phoneController,
+                            labelText: "Phone Number",
+                            hintText: "98XXXXXXXX",
+                            isPassword: false,
+                          ),
+                          const SizedBox(height: 16),
+
+                          MyTextformfield(
+                            controller: emailController,
+                            labelText: "Email",
+                            hintText: "example@gmail.com",
+                            isPassword: false,
+                          ),
+                          const SizedBox(height: 16),
+
+                          MyTextformfield(
+                            controller: passwordController,
+                            labelText: "Password",
+                            hintText: "******",
+                            isPassword: true,
+                          ),
+                          const SizedBox(height: 16),
+
+                          MyTextformfield(
+                            controller: confirmPasswordController,
+                            labelText: "Confirm Password",
+                            hintText: "******",
+                            isPassword: true,
+                          ),
+
+                          const SizedBox(height: 26),
+
+                          /// Button
+                          MyButton(
+                            text: "Sign Up",
+                            color: Colors.blue.shade700,
+                            onPressed: handleSignup,
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Already have an account? ",
+                                style: TextStyle(
+                                  color: Colors.black,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          LoginScreen(userRole: widget.userRole),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  "Login",
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+
+                          const SizedBox(height: 10),
+                        ],
+                      ),
                     ),
                   ),
-                ],
+                ),
               ),
-
-              const SizedBox(height: 20),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
