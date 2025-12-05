@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:room_rental/common/my_snackbar.dart';
 import 'package:room_rental/screens/onboardingthree_screen.dart';
 import 'package:room_rental/widgets/my_button.dart';
 
