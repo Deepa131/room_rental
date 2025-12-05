@@ -4,6 +4,7 @@ import 'package:room_rental/common/my_snackbar.dart';
 import 'package:room_rental/widgets/my_button.dart';
 import 'package:room_rental/widgets/my_textformfield.dart';
 import 'signup_screen.dart';
+import 'home_screen.dart'; 
 
 class LoginScreen extends StatefulWidget {
   final String userRole;
@@ -42,6 +43,15 @@ class _LoginScreenState extends State<LoginScreen> {
       message: "Login Successful!",
       color: Colors.green,
     );
+
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    });
   }
 
   @override
@@ -49,7 +59,6 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          /// 🌆 Background Image
           SizedBox.expand(
             child: Image.asset(
               "assets/images/onboarding_bg3.png",
@@ -57,12 +66,10 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
-          /// 🌒 Dark Overlay
           Container(
             color: Colors.black.withOpacity(0.40),
           ),
 
-          /// 🔥 Main Content with Glassmorphism
           SafeArea(
             child: Center(
               child: Padding(
@@ -86,7 +93,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                         
                           Text(
                             "RentEasy",
                             style: TextStyle(
@@ -106,7 +112,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           const SizedBox(height: 16),
 
-                          /// ✨ Welcome Title
                           const Text(
                             "Welcome Back",
                             style: TextStyle(
@@ -118,7 +123,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           const SizedBox(height: 6),
 
-                          /// 🎭 Show Role
                           Text(
                             "Login as ${widget.userRole.toUpperCase()}",
                             style: TextStyle(
@@ -129,7 +133,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           const SizedBox(height: 32),
 
-                          /// 🧑 Username
                           MyTextformfield(
                             controller: nameController,
                             labelText: "Username",
@@ -139,7 +142,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           const SizedBox(height: 18),
 
-                          /// 🔒 Password
                           MyTextformfield(
                             controller: passwordController,
                             labelText: "Password",
@@ -147,9 +149,31 @@ class _LoginScreenState extends State<LoginScreen> {
                             isPassword: true,
                           ),
 
+                          const SizedBox(height: 12),
+
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: GestureDetector(
+                              onTap: () {
+                                showMySnackBar(
+                                  context: context,
+                                  message: "Password reset coming soon!",
+                                  color: Colors.blue,
+                                );
+                              },
+                              child: Text(
+                                "Forgot password?",
+                                style: TextStyle(
+                                  color: Colors.blue.shade700,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ),
+
                           const SizedBox(height: 28),
 
-                          /// 🔵 Login Button
                           MyButton(
                             text: "Log In",
                             color: Colors.blue.shade700,
@@ -158,15 +182,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           const SizedBox(height: 20),
 
-                          /// ➕ Create Account
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
+                              const Text(
                                 "Don't have an account? ",
-                                style: TextStyle(
-                                  color: Colors.black,
-                                ),
+                                style: TextStyle(color: Colors.black),
                               ),
                               GestureDetector(
                                 onTap: () {
