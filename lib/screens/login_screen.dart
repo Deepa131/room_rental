@@ -4,7 +4,7 @@ import 'package:room_rental/common/my_snackbar.dart';
 import 'package:room_rental/widgets/my_button.dart';
 import 'package:room_rental/widgets/my_textformfield.dart';
 import 'signup_screen.dart';
-import 'home_screen.dart'; 
+import 'dashboard_screen.dart'; 
 
 class LoginScreen extends StatefulWidget {
   final String userRole;
@@ -49,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        MaterialPageRoute(builder: (context) => const DashboardScreen()),
       );
     });
   }
