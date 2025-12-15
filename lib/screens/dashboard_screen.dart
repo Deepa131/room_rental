@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:room_rental/screens/bottom_screen/home_screen.dart';
-import 'package:room_rental/screens/bottom_screen/request_screen.dart';
+import 'package:room_rental/screens/bottom_screen/appointment_screen.dart';
 import 'package:room_rental/screens/bottom_screen/profile_screen.dart';
+import 'package:room_rental/screens/bottom_screen/wishlist_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -15,16 +16,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   List<Widget> lstBottomScreen = [
     const HomeScreen(),
-    const RequestScreen(),
+    const AppointmentScreen(),
     const ProfileScreen(),
+    const WishlistScreen(),
   ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Admin Dashboard'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Dashboard'),
+      //   backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      // ),
       body: lstBottomScreen[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
@@ -35,7 +37,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month),
-            label: 'Requests',
+            label: 'Appointments',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bookmark),
+            label: 'Wishlist',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
