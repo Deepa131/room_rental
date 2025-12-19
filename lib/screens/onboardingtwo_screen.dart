@@ -15,25 +15,22 @@ class _OnboardingtwoScreenState extends State<OnboardingtwoScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background image (optional)
           SizedBox.expand(
             child: Image.asset(
-              "assets/images/image2_background.png", // add a background image for consistency
+              "assets/images/image2_background.png",
               fit: BoxFit.cover,
             ),
           ),
 
-          // Dark overlay for readability
           Container(
             color: Colors.black.withOpacity(0.15),
           ),
 
-          // Main content
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.end, // positions content at bottom
+                mainAxisAlignment: MainAxisAlignment.end, 
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Icon stack

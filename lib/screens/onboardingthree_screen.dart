@@ -15,7 +15,6 @@ class _OnboardingthreeScreenState extends State<OnboardingthreeScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background image
           SizedBox.expand(
             child: Image.asset(
               "assets/images/onboarding_bg3.png",
@@ -23,12 +22,10 @@ class _OnboardingthreeScreenState extends State<OnboardingthreeScreen> {
             ),
           ),
 
-          // Dark overlay for contrast
           Container(
             color: Colors.black.withOpacity(0.25),
           ),
 
-          // Main content
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
@@ -37,7 +34,6 @@ class _OnboardingthreeScreenState extends State<OnboardingthreeScreen> {
                 children: [
                   const SizedBox(height: 150),
 
-                  // Title
                   const Text(
                     "Choose Your Role",
                     textAlign: TextAlign.center,
@@ -63,7 +59,6 @@ class _OnboardingthreeScreenState extends State<OnboardingthreeScreen> {
 
                   const SizedBox(height: 5),
 
-                  // Role cards with gradient + shadow + blur
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,

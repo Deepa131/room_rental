@@ -15,20 +15,17 @@ class _OnboardingOneScreenState extends State<OnboardingOneScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background image
           SizedBox.expand(
             child: Image.asset(
               "assets/images/image1.png",
-              fit: BoxFit.cover, // covers the entire screen
+              fit: BoxFit.cover, 
             ),
           ),
 
-          // Overlay with content
           Container(
-            color: Colors.black.withOpacity(0.1), // optional dark overlay for text readability
+            color: Colors.black.withOpacity(0.1), 
           ),
 
-          // Main content
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
