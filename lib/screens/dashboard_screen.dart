@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:room_rental/screens/bottom_screen/home_screen.dart';
-import 'package:room_rental/screens/bottom_screen/appointment_screen.dart';
-import 'package:room_rental/screens/bottom_screen/profile_screen.dart';
-import 'package:room_rental/screens/bottom_screen/wishlist_screen.dart';
+import 'package:lost_n_found/screens/bottom_screen/appointment_screen.dart';
+import 'package:lost_n_found/screens/bottom_screen/home_screen.dart';
+import 'package:lost_n_found/screens/bottom_screen/profile_screen.dart';
+import 'package:lost_n_found/screens/bottom_screen/wishlist_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -23,10 +23,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('Dashboard'),
-      //   backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      // ),
       body: lstBottomScreen[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

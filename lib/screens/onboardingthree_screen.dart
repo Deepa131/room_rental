@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:room_rental/screens/login_screen.dart';
+import 'package:lost_n_found/screens/login_screen.dart';
 
 class OnboardingthreeScreen extends StatefulWidget {
   const OnboardingthreeScreen({super.key});

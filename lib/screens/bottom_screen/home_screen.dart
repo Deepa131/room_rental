@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:room_rental/data/wishlist_screen.dart';
-import 'package:room_rental/common/my_snackbar.dart';
+import 'package:lost_n_found/common/my_snackbar.dart';
+import 'package:lost_n_found/data/wishlist_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -56,8 +56,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ========================= HEADER =========================
-
   Widget _buildHeader(ThemeData theme) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -102,8 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ========================= SECTIONS =========================
-
   Widget _sectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -131,8 +127,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // ========================= ROOM CARD =========================
 
   Widget _roomCard({
     required String image,
@@ -285,8 +279,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-// ========================= FEATURED AREA WIDGET =========================
 
 class _FeaturedArea extends StatelessWidget {
   final String title;
