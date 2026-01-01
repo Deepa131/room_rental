@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:lost_n_found/screens/bottom_screen/appointment_screen.dart';
-import 'package:lost_n_found/screens/bottom_screen/home_screen.dart';
-import 'package:lost_n_found/screens/bottom_screen/profile_screen.dart';
-import 'package:lost_n_found/screens/bottom_screen/wishlist_screen.dart';
+import 'package:room_rental/screens/bottom_screen/appointment_screen.dart';
+import 'package:room_rental/screens/bottom_screen/home_screen.dart';
+import 'package:room_rental/screens/bottom_screen/profile_screen.dart';
+import 'package:room_rental/screens/bottom_screen/wishlist_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});

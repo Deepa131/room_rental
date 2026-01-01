@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:lost_n_found/common/my_snackbar.dart';
-import 'package:lost_n_found/data/wishlist_screen.dart';
+import 'package:room_rental/common/my_snackbar.dart';
+import 'package:room_rental/data/wishlist_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

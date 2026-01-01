@@ -1,8 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:lost_n_found/common/my_snackbar.dart';
-import 'package:lost_n_found/widgets/my_button.dart';
-import 'package:lost_n_found/widgets/my_textformfield.dart';
+import 'package:room_rental/common/my_snackbar.dart';
+import 'package:room_rental/widgets/my_button.dart';
+import 'package:room_rental/widgets/my_textformfield.dart';
 import 'signup_screen.dart';
 import 'dashboard_screen.dart'; 
 
