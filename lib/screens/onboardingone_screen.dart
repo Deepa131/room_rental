@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../widgets/my_button.dart';
+import '../core/widgets/my_button.dart';
 import 'onboardingtwo_screen.dart';
 
 class OnboardingOneScreen extends StatefulWidget {

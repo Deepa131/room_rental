@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:room_rental/screens/login_screen.dart';
+import 'package:room_rental/features/auth/presentation/pages/login_page.dart';
 
 class OnboardingthreeScreen extends StatefulWidget {
   const OnboardingthreeScreen({super.key});
@@ -77,7 +77,7 @@ class _OnboardingthreeScreenState extends State<OnboardingthreeScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const LoginScreen(userRole: "owner"),
+                                builder: (context) => const LoginPage(userRole: "owner"),
                               ),
                             );
                           },
@@ -99,7 +99,7 @@ class _OnboardingthreeScreenState extends State<OnboardingthreeScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const LoginScreen(userRole: "renter"),
+                                builder: (context) => const LoginPage(userRole: "renter"),
                               ),
                             );
                           },

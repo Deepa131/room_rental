@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:room_rental/screens/onboardingthree_screen.dart';
-import 'package:room_rental/widgets/my_button.dart';
+import 'package:room_rental/core/widgets/my_button.dart';
 
 class OnboardingtwoScreen extends StatefulWidget {
   const OnboardingtwoScreen({super.key});

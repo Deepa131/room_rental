@@ -4,13 +4,15 @@ class MyButton extends StatelessWidget {
   const MyButton({super.key, 
   required this.onPressed, 
   required this.text, 
-  this.color,
+  this.color, 
+  this.isLoading,
   });
 
   // on pressed callback
   final VoidCallback onPressed;
   final String text;
   final Color? color;
+  final bool? isLoading;
 
   @override
   Widget build(BuildContext context) {

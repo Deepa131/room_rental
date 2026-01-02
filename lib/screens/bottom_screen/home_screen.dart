@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:room_rental/common/my_snackbar.dart';
+import 'package:room_rental/core/utils/my_snackbar.dart';
 import 'package:room_rental/data/wishlist_screen.dart';
 
 class HomeScreen extends StatefulWidget {
