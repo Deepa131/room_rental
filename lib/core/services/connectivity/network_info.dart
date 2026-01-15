@@ -26,7 +26,8 @@ class NetworkInfo implements INetworkInfo {
       return false;
     }
     // return true;
-    return await _isInternetConnected();
+    // return await _isInternetConnected();
+    return true;
   }
 
   Future<bool> _isInternetConnected() async {

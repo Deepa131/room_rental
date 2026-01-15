@@ -47,18 +47,13 @@ class HiveService {
 
   //Login user
   Future<AuthHiveModel?> login(String email, String password) async {
-    try {
-      final users = _authBox.values.where(
-      (user) => 
-        user.email.trim() == email.trim() && user.password == password,
-      );
-      if (users.isNotEmpty) {
-        return users.first;
-      }
-      return null;
-    } catch (_) {
-      return null;
+    final users = _authBox.values.where(
+      (user) => user.email == email && user.password == password,
+    );
+    if (users.isNotEmpty) {
+      return users.first;
     }
+    return null;
   } 
 
   //get current user
@@ -67,12 +62,11 @@ class HiveService {
   }
 
   //logout
-  Future<void> logoutUser(String userId) async {}
+  Future<void> logoutUser() async {}
 
   //check if email exists
   bool isEmailRegistered(String email) {
-    return _authBox.values.any(
-      (user) => user.email.trim() == email.trim(),
-    );
+    final users = _authBox.values.where((user) => user.email == email);
+    return users.isNotEmpty;
   }
 }

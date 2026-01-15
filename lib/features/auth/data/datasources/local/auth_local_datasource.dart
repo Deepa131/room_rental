@@ -28,9 +28,9 @@ class AuthLocalDatasource implements IAuthLocalDatasource {
   Future<bool> register(AuthHiveModel model) async{
     try {
       await _hiveService.registerUser(model);
-      return true;
+      return Future.value(true);
     } catch (_) {
-      return false;
+      return Future.value(false);
     }
   }
 
@@ -48,7 +48,7 @@ class AuthLocalDatasource implements IAuthLocalDatasource {
           profileImage: user.profilePicture ?? '',
         );
       }
-      return user;
+      return Future.value(user);
     } catch (e) {
       return Future.value(null);
     }
@@ -62,18 +62,32 @@ class AuthLocalDatasource implements IAuthLocalDatasource {
   @override
   Future<bool> logout() async{
     try {
-      return true;
-    } catch (_) {
-      return false;
+      await _hiveService.logoutUser();
+      return Future.value(true);
+    } catch (e) {
+      return Future.value(false);
     }
   }
 
   @override
   Future<bool> isEmailExists(String email) async{
     try {
-      return _hiveService.isEmailRegistered(email);
+      final exists = _hiveService.isEmailRegistered(email);
+      return Future.value(exists);
     } catch (_) {
-      return false;
+      return Future.value(false);
     }
+  }
+  
+  @override
+  Future<AuthHiveModel?> getUserByEmail(String email) {
+    // TODO: implement getUserByEmail
+    throw UnimplementedError();
+  }
+  
+  @override
+  Future<AuthHiveModel> getUserById(String userId) {
+    // TODO: implement getUserById
+    throw UnimplementedError();
   }
 }
