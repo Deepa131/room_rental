@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:room_rental/core/widgets/my_button.dart';
-import 'package:room_rental/screens/onboardingthree_screen.dart';
+import 'package:room_rental/features/onboarding/presentation/pages/onboardingthree_page.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -30,7 +30,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const OnboardingthreeScreen(),
+                  builder: (context) => const OnboardingThreePage(),
                 ),
               );
             },

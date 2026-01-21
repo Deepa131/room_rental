@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:room_rental/screens/onboardingthree_screen.dart';
 import 'package:room_rental/core/widgets/my_button.dart';
+import 'package:room_rental/features/onboarding/presentation/pages/onboardingthree_page.dart';
 
-class OnboardingtwoScreen extends StatefulWidget {
-  const OnboardingtwoScreen({super.key});
+class OnboardingTwoPage extends StatefulWidget {
+  const OnboardingTwoPage({super.key});
 
   @override
-  State<OnboardingtwoScreen> createState() => _OnboardingtwoScreenState();
+  State<OnboardingTwoPage> createState() => _OnboardingTwoPageState();
 }
 
-class _OnboardingtwoScreenState extends State<OnboardingtwoScreen> {
+class _OnboardingTwoPageState extends State<OnboardingTwoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,7 +70,7 @@ class _OnboardingtwoScreenState extends State<OnboardingtwoScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const OnboardingthreeScreen(),
+                          builder: (context) => const OnboardingThreePage(),
                         ),
                       );
                     },

@@ -2,14 +2,14 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:room_rental/features/auth/presentation/pages/login_page.dart';
 
-class OnboardingthreeScreen extends StatefulWidget {
-  const OnboardingthreeScreen({super.key});
+class OnboardingThreePage extends StatefulWidget {
+  const OnboardingThreePage({super.key});
 
   @override
-  State<OnboardingthreeScreen> createState() => _OnboardingthreeScreenState();
+  State<OnboardingThreePage> createState() => _OnboardingThreePageState();
 }
 
-class _OnboardingthreeScreenState extends State<OnboardingthreeScreen> {
+class _OnboardingThreePageState extends State<OnboardingThreePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

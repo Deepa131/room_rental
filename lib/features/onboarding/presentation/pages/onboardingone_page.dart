@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import '../core/widgets/my_button.dart';
-import 'onboardingtwo_screen.dart';
+import '../../../../core/widgets/my_button.dart';
+import 'onboardingtwo_page.dart';
 
-class OnboardingOneScreen extends StatefulWidget {
-  const OnboardingOneScreen({super.key});
+class OnboardingOnePage extends StatefulWidget {
+  const OnboardingOnePage({super.key});
 
   @override
-  State<OnboardingOneScreen> createState() => _OnboardingOneScreenState();
+  State<OnboardingOnePage> createState() => _OnboardingOnePageState();
 }
 
-class _OnboardingOneScreenState extends State<OnboardingOneScreen> {
+class _OnboardingOnePageState extends State<OnboardingOnePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,7 +60,7 @@ class _OnboardingOneScreenState extends State<OnboardingOneScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const OnboardingtwoScreen(),
+                          builder: (context) => const OnboardingTwoPage(),
                         ),
                       );
                     },
