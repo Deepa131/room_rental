@@ -1,6 +1,11 @@
+import 'package:json_annotation/json_annotation.dart';
 import 'package:room_rental/features/auth/domain/entities/auth_entity.dart';
 
+part 'auth_api_model.g.dart';
+
+@JsonSerializable()
 class AuthApiModel {
+  @JsonKey(name: '_id')
   final String? userId;
   final String fullName;
   final String email;
@@ -18,26 +23,10 @@ class AuthApiModel {
   });
 
   //toJSON
-  Map<String, dynamic> toJson() {
-    return {
-      "fullName": fullName,
-      "email": email,
-      "password": password,
-      "role": role,
-      "profilePicture": profilePicture,
-    };
-  }
+  Map<String, dynamic> toJson() => _$AuthApiModelToJson(this);
 
   //fromJson
-  factory AuthApiModel.fromJson(Map<String, dynamic> json) {
-    return AuthApiModel(
-      userId: json['_id'] as String,
-      fullName: json['fullName'] as String,
-      email: json['email'] as String,
-      role: json['role'] as String,
-      profilePicture: json['profilePicture'] as String?,
-    );
-  }
+  factory AuthApiModel.fromJson(Map<String, dynamic> json) => _$AuthApiModelFromJson(json);
 
   //toEntity
   AuthEntity toEntity() {
