@@ -1,41 +1,66 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
+/// Extension to get theme-aware colors from BuildContext
 extension ThemeColorsExtension on BuildContext {
+  /// Returns true if current theme is dark mode
+  bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
 
-  bool get isDarkMode =>
-      Theme.of(this).brightness == Brightness.dark;
-
+  /// Primary text color (adapts to theme)
   Color get textPrimary =>
       isDarkMode ? AppColors.darkTextPrimary : AppColors.textPrimary;
 
+  /// Secondary text color (adapts to theme)
   Color get textSecondary =>
       isDarkMode ? AppColors.darkTextSecondary : AppColors.textSecondary;
 
-  Color get textMuted =>
-      isDarkMode ? AppColors.darkTextSecondary : AppColors.textMuted;
+  /// Tertiary text color (adapts to theme)
+  Color get textTertiary =>
+      isDarkMode ? AppColors.darkTextTertiary : AppColors.textTertiary;
 
-  Color get textOnPrimary => AppColors.textOnPrimary;
-
-  Color get background =>
+  /// Background color (adapts to theme)
+  Color get backgroundColor =>
       isDarkMode ? AppColors.darkBackground : AppColors.background;
 
-  Color get surface =>
+  /// Surface color (adapts to theme)
+  Color get surfaceColor =>
       isDarkMode ? AppColors.darkSurface : AppColors.surface;
 
-  Color get surfaceVariant =>
+  /// Surface variant color (adapts to theme)
+  Color get surfaceVariantColor =>
       isDarkMode ? AppColors.darkSurfaceVariant : AppColors.surfaceVariant;
 
-  Color get inputFill =>
-      isDarkMode ? AppColors.darkSurfaceVariant : AppColors.inputFill;
+  /// Input fill color (adapts to theme)
+  Color get inputFillColor =>
+      isDarkMode ? AppColors.darkInputFill : AppColors.inputFill;
 
-  Color get border =>
-      isDarkMode ? AppColors.darkBorder : AppColors.border;
+  /// Border color (adapts to theme)
+  Color get borderColor => isDarkMode ? AppColors.darkBorder : AppColors.border;
 
-  Color get divider =>
-      isDarkMode ? AppColors.darkBorder : AppColors.divider;
+  /// Divider color (adapts to theme)
+  Color get dividerColor =>
+      isDarkMode ? AppColors.darkDivider : AppColors.divider;
 
-  List<BoxShadow> get cardShadow => AppColors.cardShadow;
+  /// Card shadow (adapts to theme)
+  List<BoxShadow> get cardShadow =>
+      isDarkMode ? AppColors.darkCardShadow : AppColors.cardShadow;
 
-  List<BoxShadow> get buttonShadow => AppColors.buttonShadow;
+  /// Soft shadow (adapts to theme)
+  List<BoxShadow> get softShadow =>
+      isDarkMode ? AppColors.darkSoftShadow : AppColors.softShadow;
+
+  /// Text secondary with 60% opacity (adapts to theme)
+  Color get textSecondary60 => isDarkMode
+      ? AppColors.darkTextSecondary.withOpacity(0.6)
+      : AppColors.textSecondary60;
+
+  /// Text secondary with 50% opacity (adapts to theme)
+  Color get textSecondary50 => isDarkMode
+      ? AppColors.darkTextSecondary.withOpacity(0.5)
+      : AppColors.textSecondary50;
+
+  /// Background gradient (adapts to theme)
+  LinearGradient get backgroundGradient => isDarkMode
+      ? AppColors.darkBackgroundGradient
+      : AppColors.backgroundGradient;
 }
