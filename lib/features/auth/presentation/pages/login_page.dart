@@ -6,7 +6,8 @@ import 'package:room_rental/core/widgets/my_button.dart';
 import 'package:room_rental/core/widgets/my_textformfield.dart';
 import 'package:room_rental/features/auth/presentation/state/auth_state.dart';
 import 'package:room_rental/features/auth/presentation/view_model/auth_view_model.dart';
-import 'package:room_rental/screens/dashboard_screen.dart';
+import 'package:room_rental/features/owner_dashboard/presentation/pages/owner_dashboard_page.dart';
+import 'package:room_rental/features/renter_dashboard/presentation/pages/renter_dashboard_page.dart';
 import 'register_page.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -34,12 +35,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     ref.listenManual<AuthState>(authViewModelProvider, (previous, next) {
       if (next.status == AuthStatus.authenticated) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const DashboardScreen(),
-          ),
-        );
+        if (widget.userRole == "owner") {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const OwnerDashboardPage(),
+            ),
+            result: false,
+          );
+        } else {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const RenterDashboardPage(),
+            ),
+            (route) => false,
+          );
+        }
       } else if (next.status == AuthStatus.error &&
           next.errorMessage != null) {
         showMySnackBar(
