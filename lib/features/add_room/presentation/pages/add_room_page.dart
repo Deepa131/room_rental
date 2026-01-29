@@ -34,6 +34,8 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
   RoomTypeEntity? _selectedRoomType;
   final List<String> _imageUrls = [];
   final List<String> _videoUrls = [];
+  final List<File?> _localImageFiles = [];
+  final List<File?> _localVideoFiles = [];
   final ImagePicker _picker = ImagePicker();
 
   @override
@@ -90,12 +92,31 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
     final file = await _picker.pickImage(source: source, imageQuality: 80);
     if (file == null) return;
 
+    final imageFile = File(file.path);
+    
+    // Show local file immediately
+    setState(() {
+      _localImageFiles.add(imageFile);
+      _imageUrls.add(''); // Placeholder for URL that will be filled after upload
+    });
+
+    // Upload in background
     final url = await ref
         .read(addRoomViewModelProvider.notifier)
-        .uploadRoomImage(File(file.path));
+        .uploadRoomImage(imageFile);
 
     if (url != null) {
-      setState(() => _imageUrls.add(url));
+      print('DEBUG: Adding image URL to list: $url');
+      setState(() {
+        final index = _imageUrls.length - 1;
+        _imageUrls[index] = url;
+      });
+    } else {
+      // Remove if upload failed
+      setState(() {
+        _localImageFiles.removeLast();
+        _imageUrls.removeLast();
+      });
     }
   }
 
@@ -113,12 +134,30 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
     );
     if (file == null) return;
 
+    final videoFile = File(file.path);
+    
+    // Show local file immediately
+    setState(() {
+      _localVideoFiles.add(videoFile);
+      _videoUrls.add(''); // Placeholder for URL that will be filled after upload
+    });
+
+    // Upload in background
     final url = await ref
         .read(addRoomViewModelProvider.notifier)
-        .uploadRoomVideo(File(file.path));
+        .uploadRoomVideo(videoFile);
 
     if (url != null) {
-      setState(() => _videoUrls.add(url));
+      setState(() {
+        final index = _videoUrls.length - 1;
+        _videoUrls[index] = url;
+      });
+    } else {
+      // Remove if upload failed
+      setState(() {
+        _localVideoFiles.removeLast();
+        _videoUrls.removeLast();
+      });
     }
   }
 
@@ -346,19 +385,18 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
               const SizedBox(height: 8),
 
               MediaUploadSection(
-                selectedMedia: _imageUrls.isNotEmpty || _videoUrls.isNotEmpty
-                    ? [
-                        if (_imageUrls.isNotEmpty) File(''),
-                        if (_videoUrls.isNotEmpty) File(''),
-                      ]
-                    : [],
+                selectedMedia: [..._localImageFiles, ..._localVideoFiles],
+                remoteUrls: [..._imageUrls, ..._videoUrls],
                 onAddMedia: _showMediaPicker,
-                onRemoveMedia: () {
+                onRemoveMedia: (index) {
                   setState(() {
-                    if (_imageUrls.isNotEmpty) {
-                      _imageUrls.removeLast();
-                    } else if (_videoUrls.isNotEmpty) {
-                      _videoUrls.removeLast();
+                    final totalImages = _localImageFiles.length;
+                    if (index < totalImages) {
+                      _localImageFiles.removeAt(index);
+                      _imageUrls.removeAt(index);
+                    } else {
+                      _localVideoFiles.removeAt(index - totalImages);
+                      _videoUrls.removeAt(index - totalImages);
                     }
                   });
                 },

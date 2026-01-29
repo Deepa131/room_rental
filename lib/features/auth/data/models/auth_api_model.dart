@@ -12,6 +12,8 @@ class AuthApiModel {
   final String? password;
   final String role;
   final String? profilePicture;
+  @JsonKey(includeIfNull: true)
+  final String confirmPassword;
 
   AuthApiModel({
     this.userId, 
@@ -19,7 +21,8 @@ class AuthApiModel {
     required this.email, 
     this.password, 
     required this.role, 
-    this.profilePicture
+    this.profilePicture,
+    required this.confirmPassword,
   });
 
   //toJSON
@@ -43,12 +46,12 @@ class AuthApiModel {
   //fromEntity
   factory AuthApiModel.fromEntity(AuthEntity entity) {
     return AuthApiModel(
-      // id: entity.authId,
       fullName: entity.fullName,
       email: entity.email,
       role: entity.role,
-      profilePicture: entity.profilePicture,
+      profilePicture: entity.profilePicture ?? '',
       password: entity.password,
+      confirmPassword: entity.password,
     );
   }
 

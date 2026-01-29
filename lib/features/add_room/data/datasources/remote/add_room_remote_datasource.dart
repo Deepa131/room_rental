@@ -38,7 +38,9 @@ class AddRoomRemoteDatasource implements IAddRoomRemoteDataSource {
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
-    return response.data['data'];
+    final imageUrl = response.data['data'];
+    print('DEBUG: Uploaded image URL: $imageUrl');
+    return imageUrl;
   }
 
   @override

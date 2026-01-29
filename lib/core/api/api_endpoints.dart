@@ -15,11 +15,11 @@ class ApiEndpoints {
     }
     //yedi android
     if (kIsWeb) {
-      return 'http://localhost:5050/api';
+      return 'http://localhost:5050/api/';
     } else if (Platform.isAndroid) {
-      return 'http://10.0.2.2:5050/api';
+      return 'http://10.0.2.2:5050/api/';
     } else {
-      return 'http://10.0.2.2:5050/api';
+      return 'http://10.0.2.2:5050/api/';
     }
   }
 
