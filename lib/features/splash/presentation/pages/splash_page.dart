@@ -5,7 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:room_rental/app/routes/app_routes.dart';
 import 'package:room_rental/core/services/storage/user_session_service.dart';
 import 'package:room_rental/features/onboarding/presentation/pages/onboardingone_page.dart';
-import 'package:room_rental/screens/dashboard_screen.dart';
+import 'package:room_rental/features/owner_dashboard/presentation/pages/owner_dashboard_page.dart';
+import 'package:room_rental/features/renter_dashboard/presentation/pages/renter_dashboard_page.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -30,7 +31,13 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     final isLoggedIn= userSessionService.isLoggedIn();
 
     if (isLoggedIn) {
-      AppRoutes.pushReplacement(context, const DashboardScreen());
+      final role = userSessionService.getUserRole();
+
+      if (role == 'owner') {
+        AppRoutes.pushReplacement(context, const OwnerDashboardPage());
+      } else {
+        AppRoutes.pushReplacement(context, const RenterDashboardPage());
+      }
     } else {
       AppRoutes.pushReplacement(context, const OnboardingOnePage());
     }
