@@ -137,9 +137,7 @@ class _MediaPreviewState extends State<_MediaPreview> {
   @override
   void initState() {
     super.initState();
-    if (_isVideo()) {
-      _thumbnailFuture = _generateThumbnail();
-    }
+    _thumbnailFuture = _isVideo() ? _generateThumbnail() : Future.value(null);
   }
 
   bool _isVideo() {

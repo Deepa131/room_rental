@@ -44,11 +44,7 @@ class AuthRemoteDatasource implements IAuthRemoteDatasource {
     if (response.data['success'] == true) {
       final data = response.data['data'] as Map<String, dynamic>;
       final user = AuthApiModel.fromJson(data);
-      
-      // Extract userId from raw data since API uses "_id"
       final userId = data['_id'] as String?;
-      
-      print('DEBUG userId from API: $userId');
         
       //Save user session with correct userId
       await _userSessionService.saveUserSession(

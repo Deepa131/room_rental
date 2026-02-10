@@ -13,6 +13,8 @@ import 'package:room_rental/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:room_rental/features/auth/domain/usecases/register_usecase.dart';
 import 'package:room_rental/features/auth/presentation/pages/login_page.dart';
 
+// flutter pub run test_cov_console
+
 class MockLoginUsecase extends Mock implements LoginUsecase {}
 
 class MockRegisterUsecase extends Mock implements RegisterUsecase {}

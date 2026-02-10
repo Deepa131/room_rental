@@ -12,8 +12,8 @@ class AuthApiModel {
   final String? password;
   final String role;
   final String? profilePicture;
-  @JsonKey(includeIfNull: true)
-  final String confirmPassword;
+  @JsonKey(includeIfNull: false)
+  final String? confirmPassword;
 
   AuthApiModel({
     this.userId, 
@@ -22,7 +22,7 @@ class AuthApiModel {
     this.password, 
     required this.role, 
     this.profilePicture,
-    required this.confirmPassword,
+    this.confirmPassword,
   });
 
   //toJSON
