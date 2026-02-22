@@ -17,14 +17,7 @@ AuthApiModel _$AuthApiModelFromJson(Map<String, dynamic> json) => AuthApiModel(
     );
 
 Map<String, dynamic> _$AuthApiModelToJson(AuthApiModel instance) {
-  final val = <String, dynamic>{
-    '_id': instance.userId,
-    'fullName': instance.fullName,
-    'email': instance.email,
-    'password': instance.password,
-    'role': instance.role,
-    'profilePicture': instance.profilePicture,
-  };
+  final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {
     if (value != null) {
@@ -32,6 +25,12 @@ Map<String, dynamic> _$AuthApiModelToJson(AuthApiModel instance) {
     }
   }
 
+  writeNotNull('_id', instance.userId);
+  val['fullName'] = instance.fullName;
+  val['email'] = instance.email;
+  val['password'] = instance.password;
+  val['role'] = instance.role;
+  val['profilePicture'] = instance.profilePicture;
   writeNotNull('confirmPassword', instance.confirmPassword);
   return val;
 }

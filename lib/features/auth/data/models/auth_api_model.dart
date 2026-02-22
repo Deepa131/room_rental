@@ -5,7 +5,7 @@ part 'auth_api_model.g.dart';
 
 @JsonSerializable()
 class AuthApiModel {
-  @JsonKey(name: '_id')
+  @JsonKey(name: '_id', includeIfNull: false)
   final String? userId;
   final String fullName;
   final String email;
@@ -28,6 +28,13 @@ class AuthApiModel {
   //toJSON
   Map<String, dynamic> toJson() => _$AuthApiModelToJson(this);
 
+  // toJson for update (excludes _id)
+  Map<String, dynamic> toUpdateJson() {
+    final json = _$AuthApiModelToJson(this);
+    json.remove('_id'); 
+    return json;
+  }
+
   //fromJson
   factory AuthApiModel.fromJson(Map<String, dynamic> json) => _$AuthApiModelFromJson(json);
 
@@ -46,10 +53,11 @@ class AuthApiModel {
   //fromEntity
   factory AuthApiModel.fromEntity(AuthEntity entity) {
     return AuthApiModel(
+      userId: null, 
       fullName: entity.fullName,
       email: entity.email,
       role: entity.role,
-      profilePicture: entity.profilePicture ?? '',
+      profilePicture: entity.profilePicture,
       password: entity.password,
       confirmPassword: entity.password,
     );
