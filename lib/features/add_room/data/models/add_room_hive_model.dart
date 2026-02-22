@@ -47,9 +47,13 @@ class AddRoomHiveModel extends HiveObject {
   @HiveField(12)
   final DateTime createdAt;
 
+  @HiveField(13)
+  final String? ownerName;
+
   AddRoomHiveModel({
     String? roomId,
     this.ownerId,
+    this.ownerName,
     required this.ownerContactNumber,
     required this.roomTitle,
     required this.monthlyPrice,
@@ -70,6 +74,7 @@ class AddRoomHiveModel extends HiveObject {
     return AddRoomEntity(
       roomId: roomId,
       ownerId: ownerId,
+      ownerName: ownerName,
       ownerContactNumber: ownerContactNumber,
       roomTitle: roomTitle,
       monthlyPrice: monthlyPrice,
@@ -88,6 +93,7 @@ class AddRoomHiveModel extends HiveObject {
     return AddRoomHiveModel(
       roomId: entity.roomId,
       ownerId: entity.ownerId,
+      ownerName: entity.ownerName,
       ownerContactNumber: entity.ownerContactNumber,
       roomTitle: entity.roomTitle,
       monthlyPrice: entity.monthlyPrice,
