@@ -51,6 +51,10 @@ class AddRoomViewModel extends Notifier<AddRoomState> {
         errorMessage: failure.message,
       ),
       (rooms) {
+        rooms.sort(
+          (a, b) => (b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0))
+              .compareTo(a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0)),
+        );
         final availableRooms =
             rooms.where((room) => room.isAvailable).toList();
         final bookedRooms =
@@ -91,11 +95,17 @@ class AddRoomViewModel extends Notifier<AddRoomState> {
     );
 
     result.fold(
-      (failure) => state = state.copyWith(
-        status: AddRoomStatus.error,
-        errorMessage: failure.message,
-      ),
+      (failure) {
+        state = state.copyWith(
+          status: AddRoomStatus.error,
+          errorMessage: failure.message,
+        );
+      },
       (rooms) {
+        rooms.sort(
+          (a, b) => (b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0))
+              .compareTo(a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0)),
+        );
         final availableRooms =
             rooms.where((room) => room.isAvailable).toList();
         final bookedRooms =
@@ -121,6 +131,7 @@ class AddRoomViewModel extends Notifier<AddRoomState> {
     String? description,
     List<String>? images,
     List<String>? videos,
+    Map<String, dynamic>? locationCoords,
   }) async {
     state = state.copyWith(status: AddRoomStatus.loading);
 
@@ -135,20 +146,24 @@ class AddRoomViewModel extends Notifier<AddRoomState> {
         description: description,
         images: images,
         videos: videos,
+        locationCoords: locationCoords,
       ),
     );
 
     result.fold(
-      (failure) => state = state.copyWith(
-        status: AddRoomStatus.error,
-        errorMessage: failure.message,
-      ),
+      (failure) {
+        state = state.copyWith(
+          status: AddRoomStatus.error,
+          errorMessage: failure.message,
+        );
+      },
       (success) {
         state = state.copyWith(
           status: AddRoomStatus.created,
           resetUploadedImageUrl: true,
           resetUploadedVideoUrl: true,
         );
+        getMyRooms(ownerId);
         getAllRooms();
       },
     );
@@ -167,6 +182,7 @@ class AddRoomViewModel extends Notifier<AddRoomState> {
     List<String>? videos,
     bool? isAvailable,
     String? approvalStatus,
+    Map<String, dynamic>? locationCoords,
   }) async {
     state = state.copyWith(status: AddRoomStatus.loading);
 
@@ -184,6 +200,7 @@ class AddRoomViewModel extends Notifier<AddRoomState> {
         videos: videos,
         isAvailable: isAvailable,
         approvalStatus: approvalStatus,
+        locationCoords: locationCoords,
       ),
     );
 
@@ -194,12 +211,13 @@ class AddRoomViewModel extends Notifier<AddRoomState> {
       ),
       (success) {
         state = state.copyWith(status: AddRoomStatus.updated);
+        getMyRooms(ownerId);
         getAllRooms();
       },
     );
   }
 
-  Future<void> deleteRoom(String roomId) async {
+  Future<void> deleteRoom(String roomId, {String? ownerId}) async {
     state = state.copyWith(status: AddRoomStatus.loading);
 
     final result = await _deleteRoomUsecase(
@@ -213,6 +231,11 @@ class AddRoomViewModel extends Notifier<AddRoomState> {
       ),
       (success) {
         state = state.copyWith(status: AddRoomStatus.deleted);
+        if (ownerId != null) {
+          getMyRooms(ownerId);
+        } else {
+          getAllRooms();
+        }
         getAllRooms();
       },
     );
