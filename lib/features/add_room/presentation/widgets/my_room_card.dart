@@ -7,11 +7,13 @@ class MyRoomCard extends StatelessWidget {
   final String title;
   final String location;
   final String roomType;
-  final String status; // e.g., 'available', 'rented'
+  final String status; // e.g., 'Available', 'Rented'
   final String? imageUrl;
+  final String? price;
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final VoidCallback? onToggleAvailability;
 
   const MyRoomCard({
     super.key,
@@ -20,9 +22,11 @@ class MyRoomCard extends StatelessWidget {
     required this.roomType,
     required this.status,
     this.imageUrl,
+    this.price,
     this.onTap,
     this.onEdit,
     this.onDelete,
+    this.onToggleAvailability,
   });
 
   Color _getStatusColor(String status) {
@@ -56,24 +60,34 @@ class MyRoomCard extends StatelessWidget {
     final isInactive = status.toLowerCase() == 'inactive';
 
     return Opacity(
-      opacity: isInactive ? 0.6 : 1.0,
+      opacity: isInactive ? 0.65 : 1.0,
       child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: context.surfaceColor,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: context.softShadow,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(12.0),
               child: Column(
                 children: [
                   _buildMainContent(context),
-                  if (!isInactive) _buildActionButtons(context),
+                  if (!isInactive) ...[
+                    const SizedBox(height: 10),
+                    _buildActionButtons(context),
+                  ],
                 ],
               ),
             ),
@@ -195,16 +209,63 @@ class MyRoomCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
+        if (price != null) ...[
+          const SizedBox(width: 8),
+          Text(
+            '₹$price/mo',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: context.textPrimary,
+            ),
+          ),
+        ],
       ],
     );
   }
 
   Widget _buildActionButtons(BuildContext context) {
+    final isAvailable = status.toLowerCase() == 'available';
+    
     return Column(
       children: [
         const SizedBox(height: 12),
         Divider(color: context.dividerColor),
         const SizedBox(height: 8),
+        // Toggle Availability Button
+        GestureDetector(
+          onTap: onToggleAvailability,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              color: isAvailable 
+                  ? AppColors.warning.withAlpha(26)
+                  : AppColors.foundColor.withAlpha(26),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  isAvailable ? Icons.check_circle_rounded : Icons.lock_clock_rounded,
+                  size: 16,
+                  color: isAvailable ? AppColors.warning : AppColors.foundColor,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  isAvailable ? 'Mark as Rented' : 'Mark as Available',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isAvailable ? AppColors.warning : AppColors.foundColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        // Edit and Delete Buttons
         Row(
           children: [
             Expanded(

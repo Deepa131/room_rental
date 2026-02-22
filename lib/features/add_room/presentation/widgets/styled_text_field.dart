@@ -7,6 +7,7 @@ class StyledTextField extends StatelessWidget {
   final IconData? prefixIcon;
   final int maxLines;
   final String? Function(String?)? validator;
+  final TextInputType keyboardType;
 
   const StyledTextField({
     super.key,
@@ -15,6 +16,7 @@ class StyledTextField extends StatelessWidget {
     this.prefixIcon,
     this.maxLines = 1,
     this.validator,
+    this.keyboardType = TextInputType.text,
   });
 
   @override
@@ -28,6 +30,7 @@ class StyledTextField extends StatelessWidget {
       child: TextFormField(
         controller: controller,
         maxLines: maxLines,
+        keyboardType: keyboardType,
         style: TextStyle(color: context.textPrimary),
         decoration: InputDecoration(
           hintText: hintText,
