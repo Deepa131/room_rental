@@ -5,7 +5,7 @@ part 'room_type_api_model.g.dart';
 
 @JsonSerializable()
 class RoomTypeApiModel {
-  @JsonKey(name: '_id')
+  @JsonKey(name: 'id')
   final String? id;
   final String typeName;
   final String? status;
@@ -23,7 +23,7 @@ class RoomTypeApiModel {
   RoomTypeEntity toEntity() {
     return RoomTypeEntity(
       typeId: id,
-      typeName: 'UK - $typeName',
+      typeName: typeName,
       status: status,
     );
   }
