@@ -21,6 +21,7 @@ class UpdateRoomParams extends Equatable {
   final List<String>? videos;
   final bool? isAvailable;
   final String? approvalStatus;
+  final Map<String, dynamic>? locationCoords;
 
   const UpdateRoomParams({
     required this.roomId,
@@ -35,6 +36,7 @@ class UpdateRoomParams extends Equatable {
     this.videos,
     this.isAvailable,
     this.approvalStatus,
+    this.locationCoords,
   });
 
   @override
@@ -51,6 +53,7 @@ class UpdateRoomParams extends Equatable {
         videos,
         isAvailable,
         approvalStatus,
+        locationCoords,
       ];
 }
 
@@ -74,6 +77,13 @@ class UpdateRoomUsecase implements UsecaseWithParams<bool, UpdateRoomParams> {
       roomTitle: params.roomTitle,
       monthlyPrice: params.monthlyPrice,
       location: params.location,
+      locationCoords: params.locationCoords != null
+          ? LocationCoordsEntity(
+              latitude: params.locationCoords!['latitude'] as double,
+              longitude: params.locationCoords!['longitude'] as double,
+              address: params.locationCoords!['address'] as String?,
+            )
+          : null,
       roomType: params.roomType,
       description: params.description,
       images: params.images,
