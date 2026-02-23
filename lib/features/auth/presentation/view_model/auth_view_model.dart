@@ -5,7 +5,6 @@ import 'package:room_rental/core/error/failures.dart';
 import 'package:room_rental/features/auth/domain/entities/auth_entity.dart';
 import 'package:room_rental/features/auth/domain/usecases/login_usecase.dart';
 import 'package:room_rental/features/auth/domain/usecases/register_usecase.dart';
-import 'package:room_rental/features/auth/domain/usecases/reset_password_usecase.dart';
 import 'package:room_rental/features/auth/domain/usecases/update_profile_picture_usecase.dart';
 import 'package:room_rental/features/auth/domain/usecases/update_profile_usecase.dart';
 import 'package:room_rental/features/auth/presentation/state/auth_state.dart';
@@ -19,7 +18,6 @@ final authViewModelProvider =
 class AuthViewModel extends Notifier<AuthState> {
   late final RegisterUsecase _registerUsecase;
   late final LoginUsecase _loginUsecase;
-  late final ResetPasswordUsecase _resetPasswordUsecase;
   late final UpdateProfileUsecase _updateProfileUsecase;
   late final UpdateProfilePictureUsecase _updateProfilePictureUsecase;
 
@@ -27,7 +25,6 @@ class AuthViewModel extends Notifier<AuthState> {
   AuthState build() {
     _registerUsecase = ref.read(registerUsecaseProvider);
     _loginUsecase = ref.read(loginUsecaseProvider);
-    _resetPasswordUsecase = ref.read(resetPasswordUsecaseProvider);
     _updateProfileUsecase = ref.read(updateProfileUsecaseProvider);
     _updateProfilePictureUsecase = ref.read(updateProfilePictureUsecaseProvider);
     return const AuthState();
@@ -105,20 +102,6 @@ class AuthViewModel extends Notifier<AuthState> {
 
   Future<void> resetPassword(String token, String password) async {
     state = state.copyWith(status: AuthStatus.loading);
-
-    final result = await _resetPasswordUsecase(token, password);
-
-    result.fold(
-      (failure) {
-        state = state.copyWith(
-          status: AuthStatus.error,
-          errorMessage: failure.message,
-        );
-      },
-      (success) {
-        state = state.copyWith(status: AuthStatus.initial);
-      },
-    );
   }
 
   Future<Either<Failure, AuthEntity>> updateProfile(String id, AuthEntity user, {File? imageFile}) async {
