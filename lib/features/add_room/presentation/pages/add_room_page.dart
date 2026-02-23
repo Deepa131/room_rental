@@ -47,11 +47,8 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
   @override
   void initState() {
     super.initState();
-    // Load room types immediately
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(typeViewmodelProvider.notifier).getAllTypes();
-
-      // If editing, load the room data
       if (widget.roomId != null) {
         ref.read(addRoomViewModelProvider.notifier).getRoomById(widget.roomId!);
       }
@@ -95,7 +92,6 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
     return false;
   }
 
-  // Pick image from camera/gallery
   Future<void> _pickImage(ImageSource source) async {
     final hasPermission = await _requestPermission(Permission.camera);
     if (!hasPermission) return;
@@ -105,18 +101,14 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
 
     final imageFile = File(file.path);
 
-    // Show local file immediately
     setState(() {
       _localImageFiles.add(imageFile);
       _imageUrls.add(
         '',
-      ); // Placeholder for URL that will be filled after upload
+      ); 
     });
 
-    // Upload in background
-    final url = await ref
-        .read(addRoomViewModelProvider.notifier)
-        .uploadRoomImage(imageFile);
+    final url = await ref.read(addRoomViewModelProvider.notifier).uploadRoomImage(imageFile);
 
     if (url != null) {
       setState(() {
@@ -124,7 +116,6 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
         _imageUrls[index] = url;
       });
     } else {
-      // Remove if upload failed
       setState(() {
         _localImageFiles.removeLast();
         _imageUrls.removeLast();
@@ -132,7 +123,6 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
     }
   }
 
-  // Record video using camera
   Future<void> _pickVideo() async {
     final hasCameraPermission = await _requestPermission(Permission.camera);
     if (!hasCameraPermission) return;
@@ -148,18 +138,14 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
 
     final videoFile = File(file.path);
 
-    // Show local file immediately
     setState(() {
       _localVideoFiles.add(videoFile);
       _videoUrls.add(
         '',
-      ); // Placeholder for URL that will be filled after upload
+      ); 
     });
 
-    // Upload in background
-    final url = await ref
-        .read(addRoomViewModelProvider.notifier)
-        .uploadRoomVideo(videoFile);
+    final url = await ref.read(addRoomViewModelProvider.notifier).uploadRoomVideo(videoFile);
 
     if (url != null) {
       setState(() {
@@ -167,7 +153,6 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
         _videoUrls[index] = url;
       });
     } else {
-      // Remove if upload failed
       setState(() {
         _localVideoFiles.removeLast();
         _videoUrls.removeLast();
@@ -175,7 +160,6 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
     }
   }
 
-  // show media picker bottom sheet
   void _showMediaPicker() {
     MediaPickerBottomSheet.show(
       context,
@@ -184,8 +168,6 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
       onVideoTap: _pickVideo,
     );
   }
-
-  // Populate form fields when editing a room
   void _populateFormFields(dynamic room) {
     setState(() {
       _titleController.text = room.roomTitle ?? '';
@@ -195,7 +177,6 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
       _descriptionController.text = room.description ?? '';
       _selectedRoomType = room.roomType;
 
-      // Handle location - either with coords or just text
       if (room.locationCoords != null) {
         final coords = room.locationCoords;
         _selectedLocationCoords = LocationCoords(
@@ -206,8 +187,6 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
         _locationController.text =
             coords.address ?? room.location ?? _locationController.text;
       } else if (room.location != null && room.location.toString().isNotEmpty) {
-        // No coordinates but has location string - create a temporary LocationCoords
-        // with Kathmandu default coords and the actual address
         _selectedLocationCoords = LocationCoords(
           latitude: 27.7172,
           longitude: 85.324,
@@ -246,7 +225,6 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
       return;
     }
 
-    // Parse price - remove "Rs. " prefix if present
     String priceText = _priceController.text.trim();
     if (priceText.startsWith('Rs.')) {
       priceText = priceText.replaceFirst('Rs.', '').trim();
@@ -290,7 +268,6 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
       return;
     }
 
-    // Parse price - remove "Rs. " prefix if present
     String priceText = _priceController.text.trim();
     if (priceText.startsWith('Rs.')) {
       priceText = priceText.replaceFirst('Rs.', '').trim();
@@ -311,50 +288,41 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
     final isEditMode = widget.roomId != null;
 
     if (isEditMode) {
-      // Update existing room
-      await ref
-          .read(addRoomViewModelProvider.notifier)
-          .updateRoom(
-            roomId: widget.roomId!,
-            ownerId: ownerId,
-            ownerContactNumber: _contactController.text.trim(),
-            roomTitle: _titleController.text.trim(),
-            monthlyPrice: monthlyPrice,
-            location: _locationController.text.trim(),
-            roomType: _selectedRoomType!,
-            description: _descriptionController.text.trim(),
-            images: _imageUrls,
-            videos: _videoUrls,
-            locationCoords: _selectedLocationCoords != null
-                ? {
-                    'latitude': _selectedLocationCoords!.latitude,
-                    'longitude': _selectedLocationCoords!.longitude,
-                    'address': _selectedLocationCoords!.address,
-                  }
-                : null,
-          );
+      await ref.read(addRoomViewModelProvider.notifier).updateRoom(
+        roomId: widget.roomId!,
+        ownerId: ownerId,
+        ownerContactNumber: _contactController.text.trim(),
+        roomTitle: _titleController.text.trim(),
+        monthlyPrice: monthlyPrice,
+        location: _locationController.text.trim(),
+        roomType: _selectedRoomType!,
+        description: _descriptionController.text.trim(),
+        images: _imageUrls,
+        videos: _videoUrls,
+        locationCoords: _selectedLocationCoords != null ? {
+          'latitude': _selectedLocationCoords!.latitude,
+          'longitude': _selectedLocationCoords!.longitude,
+          'address': _selectedLocationCoords!.address,
+        }
+        : null,
+      );
     } else {
-      // Create new room
-      await ref
-          .read(addRoomViewModelProvider.notifier)
-          .createRoom(
-            ownerId: ownerId,
-            ownerContactNumber: _contactController.text.trim(),
-            roomTitle: _titleController.text.trim(),
-            monthlyPrice: monthlyPrice,
-            location: _locationController.text.trim(),
-            roomType: _selectedRoomType!,
-            description: _descriptionController.text.trim(),
-            images: _imageUrls,
-            videos: _videoUrls,
-            locationCoords: _selectedLocationCoords != null
-                ? {
-                    'latitude': _selectedLocationCoords!.latitude,
-                    'longitude': _selectedLocationCoords!.longitude,
-                    'address': _selectedLocationCoords!.address,
-                  }
-                : null,
-          );
+      await ref.read(addRoomViewModelProvider.notifier).createRoom(
+        ownerId: ownerId,
+        ownerContactNumber: _contactController.text.trim(),
+        roomTitle: _titleController.text.trim(),
+        monthlyPrice: monthlyPrice,
+        location: _locationController.text.trim(),
+        roomType: _selectedRoomType!,
+        description: _descriptionController.text.trim(),
+        images: _imageUrls,
+        videos: _videoUrls,
+        locationCoords: _selectedLocationCoords != null ? {
+          'latitude': _selectedLocationCoords!.latitude,
+          'longitude': _selectedLocationCoords!.longitude,
+          'address': _selectedLocationCoords!.address,
+        } : null,
+      );
     }
   }
 
@@ -364,13 +332,10 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
     final roomTypeState = ref.watch(typeViewmodelProvider);
     final isEditMode = widget.roomId != null;
 
-    // Load room types on first build if not loaded yet
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (roomTypeState.status == RoomTypeStatus.initial) {
         ref.read(typeViewmodelProvider.notifier).getAllTypes();
       }
-
-      // Populate form fields if editing and room data is loaded
       if (isEditMode &&
           addRoomState.selectedRoom != null &&
           _titleController.text.isEmpty) {
@@ -399,7 +364,6 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
     }
 
     ref.listen(addRoomViewModelProvider, (prev, next) {
-      // Check if a room was successfully created (status went from loading to created)
       final wasJustCreated =
           (prev != null &&
           prev.status != AddRoomStatus.created &&
@@ -525,7 +489,7 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
 
                   StyledTextField(
                     controller: _contactController,
-                    hintText: 'Contact number (10 digits)',
+                    hintText: 'Contact number',
                     keyboardType: TextInputType.phone,
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
@@ -534,8 +498,6 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                     validator: (v) {
                       if (v == null || v.isEmpty) return 'Required';
                       final digits = v.replaceAll(RegExp(r'\D'), '');
-                      if (digits.length != 10)
-                        return 'Contact number must be 10 digits';
                       return null;
                     },
                   ),
@@ -563,9 +525,7 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                               const SizedBox(height: 8),
                               ElevatedButton(
                                 onPressed: () {
-                                  ref
-                                      .read(typeViewmodelProvider.notifier)
-                                      .getAllTypes();
+                                  ref.read(typeViewmodelProvider.notifier).getAllTypes();
                                 },
                                 child: const Text('Retry'),
                               ),
@@ -580,7 +540,7 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            'No room types available. Please check your Hive database.',
+                            'No room types available.',
                             style: TextStyle(color: Colors.orange[700]),
                           ),
                         )
