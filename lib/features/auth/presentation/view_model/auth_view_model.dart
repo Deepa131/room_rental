@@ -3,7 +3,6 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:room_rental/core/error/failures.dart';
 import 'package:room_rental/features/auth/domain/entities/auth_entity.dart';
-import 'package:room_rental/features/auth/domain/usecases/forgot_password_usecase.dart';
 import 'package:room_rental/features/auth/domain/usecases/login_usecase.dart';
 import 'package:room_rental/features/auth/domain/usecases/register_usecase.dart';
 import 'package:room_rental/features/auth/domain/usecases/reset_password_usecase.dart';
@@ -20,7 +19,6 @@ final authViewModelProvider =
 class AuthViewModel extends Notifier<AuthState> {
   late final RegisterUsecase _registerUsecase;
   late final LoginUsecase _loginUsecase;
-  late final ForgotPasswordUsecase _forgotPasswordUsecase;
   late final ResetPasswordUsecase _resetPasswordUsecase;
   late final UpdateProfileUsecase _updateProfileUsecase;
   late final UpdateProfilePictureUsecase _updateProfilePictureUsecase;
@@ -29,7 +27,6 @@ class AuthViewModel extends Notifier<AuthState> {
   AuthState build() {
     _registerUsecase = ref.read(registerUsecaseProvider);
     _loginUsecase = ref.read(loginUsecaseProvider);
-    _forgotPasswordUsecase = ref.read(forgotPasswordUsecaseProvider);
     _resetPasswordUsecase = ref.read(resetPasswordUsecaseProvider);
     _updateProfileUsecase = ref.read(updateProfileUsecaseProvider);
     _updateProfilePictureUsecase = ref.read(updateProfilePictureUsecaseProvider);
@@ -104,24 +101,6 @@ class AuthViewModel extends Notifier<AuthState> {
 
   void logout() {
     state = const AuthState(status: AuthStatus.unauthenticated);
-  }
-
-  Future<void> forgotPassword(String email) async {
-    state = state.copyWith(status: AuthStatus.loading);
-
-    final result = await _forgotPasswordUsecase(email);
-
-    result.fold(
-      (failure) {
-        state = state.copyWith(
-          status: AuthStatus.error,
-          errorMessage: failure.message,
-        );
-      },
-      (success) {
-        state = state.copyWith(status: AuthStatus.initial);
-      },
-    );
   }
 
   Future<void> resetPassword(String token, String password) async {
