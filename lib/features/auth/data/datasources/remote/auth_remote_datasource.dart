@@ -87,16 +87,6 @@ class AuthRemoteDatasource implements IAuthRemoteDatasource {
   }
 
   @override
-  Future<bool> forgotPassword(String email) async {
-    final response = await _apiClient.post(
-      ApiEndpoints.forgotPassword,
-      data: {'email': email},
-    );
-
-    return response.data['success'] == true;
-  }
-
-  @override
   Future<bool> resetPassword(String token, String password) async {
     final response = await _apiClient.post(
       ApiEndpoints.resetPassword(token),
