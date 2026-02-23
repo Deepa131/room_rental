@@ -107,7 +107,6 @@ class _RouteDisplayWidgetState extends ConsumerState<RouteDisplayWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // Permission not granted - show request button
     if (!_permissionGranted) {
       return InkWell(
         onTap: _loading ? null : _requestLocation,
@@ -139,7 +138,6 @@ class _RouteDisplayWidgetState extends ConsumerState<RouteDisplayWidget> {
       );
     }
 
-    // Permission granted but no location data yet
     if (_userLocation == null || _distance == null) {
       return Row(
         children: [
@@ -160,11 +158,9 @@ class _RouteDisplayWidgetState extends ConsumerState<RouteDisplayWidget> {
       );
     }
 
-    // Main UI - Compact inline display with expandable details (like web)
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Compact inline display (always visible)
         InkWell(
           onTap: () {
             setState(() {
@@ -176,7 +172,6 @@ class _RouteDisplayWidgetState extends ConsumerState<RouteDisplayWidget> {
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(
               children: [
-                // Distance
                 const Icon(
                   Icons.location_on,
                   size: 16,
@@ -192,7 +187,6 @@ class _RouteDisplayWidgetState extends ConsumerState<RouteDisplayWidget> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Separator dot
                 Container(
                   width: 4,
                   height: 4,
@@ -202,7 +196,6 @@ class _RouteDisplayWidgetState extends ConsumerState<RouteDisplayWidget> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Travel time
                 const Icon(
                   Icons.schedule,
                   size: 14,
@@ -217,7 +210,6 @@ class _RouteDisplayWidgetState extends ConsumerState<RouteDisplayWidget> {
                   ),
                 ),
                 const Spacer(),
-                // Expand/collapse icon
                 Icon(
                   _showRouteDetails
                       ? Icons.keyboard_arrow_up
@@ -230,7 +222,6 @@ class _RouteDisplayWidgetState extends ConsumerState<RouteDisplayWidget> {
           ),
         ),
 
-        // Expandable route details (similar to web)
         if (_showRouteDetails) ...[
           const SizedBox(height: 12),
           AnimatedSize(
@@ -238,10 +229,8 @@ class _RouteDisplayWidgetState extends ConsumerState<RouteDisplayWidget> {
             curve: Curves.easeInOut,
             child: Column(
               children: [
-                // Distance and Time Cards
                 Row(
                   children: [
-                    // Distance Card
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
@@ -288,7 +277,6 @@ class _RouteDisplayWidgetState extends ConsumerState<RouteDisplayWidget> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    // Travel Time Card
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
@@ -337,7 +325,6 @@ class _RouteDisplayWidgetState extends ConsumerState<RouteDisplayWidget> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                // View Route Button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(

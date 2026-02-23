@@ -40,7 +40,6 @@ class _LocationPickerModalState extends State<LocationPickerModal> {
 
   Future<void> _checkAndRequestPermission() async {
     if (_selectedLocation != null) {
-      // Already have a location, no need to request current location
       return;
     }
 
@@ -56,7 +55,7 @@ class _LocationPickerModalState extends State<LocationPickerModal> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Location permission permanently denied. You can still pick manually.',
+            'Location permission permanently denied.',
           ),
           backgroundColor: Colors.orange,
         ),
@@ -77,7 +76,7 @@ class _LocationPickerModalState extends State<LocationPickerModal> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Location services are off. You can still pick manually.'),
+            content: Text('Location services are off.'),
             backgroundColor: Colors.orange,
           ),
         );
@@ -85,7 +84,6 @@ class _LocationPickerModalState extends State<LocationPickerModal> {
         return;
       }
 
-      // Try to get cached location first
       final cachedLocation = await LocationService.getCachedUserLocation();
       if (cachedLocation != null) {
         await _updateSelectedLocation(
@@ -93,7 +91,6 @@ class _LocationPickerModalState extends State<LocationPickerModal> {
           cachedLocation.longitude,
         );
       } else if (hasPermission && serviceEnabled) {
-        // Get current location
         final location = await LocationService.getCurrentLocation();
         if (location != null) {
           await LocationService.cacheUserLocation(location);
@@ -119,7 +116,6 @@ class _LocationPickerModalState extends State<LocationPickerModal> {
       _selectedAddress = address;
     });
 
-    // Move map to the new location
     _mapController.move(LatLng(latitude, longitude), 15);
   }
 
@@ -140,7 +136,7 @@ class _LocationPickerModalState extends State<LocationPickerModal> {
 
       if (result == null) {
         setState(() {
-          _searchError = 'No results found. Try "Kathmandu", "Patan", or "Pokhara"';
+          _searchError = 'No results found.';
           _isSearching = false;
         });
         return;
@@ -153,7 +149,6 @@ class _LocationPickerModalState extends State<LocationPickerModal> {
         _isSearching = false;
       });
 
-      // Move map to search result
       _mapController.move(LatLng(result.latitude, result.longitude), 15);
     } catch (e) {
       setState(() {
@@ -190,7 +185,7 @@ class _LocationPickerModalState extends State<LocationPickerModal> {
   @override
   Widget build(BuildContext context) {
     final currentLocation = _selectedLocation ??
-        LocationCoords(latitude: 27.7172, longitude: 85.324); // Default to Kathmandu
+        LocationCoords(latitude: 27.7172, longitude: 85.324); 
 
     final markers = _selectedLocation != null
         ? <Marker>[
@@ -261,7 +256,6 @@ class _LocationPickerModalState extends State<LocationPickerModal> {
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      // Search bar
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -318,8 +312,6 @@ class _LocationPickerModalState extends State<LocationPickerModal> {
                         ],
                       ),
                       const SizedBox(height: 16),
-
-                      // Permission/Location indicator
                       if (_isLoadingLocation)
                         Container(
                           padding: const EdgeInsets.all(12),
@@ -425,7 +417,6 @@ class _LocationPickerModalState extends State<LocationPickerModal> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Selected location display
                       if (_selectedLocation != null)
                         Container(
                           decoration: BoxDecoration(
@@ -456,7 +447,6 @@ class _LocationPickerModalState extends State<LocationPickerModal> {
                         ),
                       const SizedBox(height: 16),
 
-                      // Instructions
                       const Text(
                         'Tap on the map or drag the marker to update the location',
                         textAlign: TextAlign.center,
@@ -471,7 +461,6 @@ class _LocationPickerModalState extends State<LocationPickerModal> {
               ),
             ),
 
-            // Footer with buttons
             Container(
               decoration: BoxDecoration(
                 border: Border(top: BorderSide(color: Colors.grey[300]!)),

@@ -61,16 +61,15 @@ class _NavigationContainerState extends State<NavigationContainer> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('🚀 Navigation started! Your location will update in real-time.'),
+        content: Text('Navigation started! Your location will update in real-time.'),
         backgroundColor: Colors.green,
         duration: Duration(seconds: 2),
       ),
     );
 
-    // Start listening to position updates
     const LocationSettings locationSettings = LocationSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 10, // Update every 10 meters
+      distanceFilter: 10, 
     );
 
     _positionStreamSubscription = Geolocator.getPositionStream(
@@ -80,10 +79,8 @@ class _NavigationContainerState extends State<NavigationContainer> {
         _currentLocation = LatLng(position.latitude, position.longitude);
       });
 
-      // Center map on user's current position
       _mapController.move(_currentLocation, _mapController.camera.zoom);
 
-      // Check if arrived (within 50 meters)
       final distance = _calculateDistance();
       if (distance < 0.05 && !_hasArrived) {
         setState(() {
@@ -94,7 +91,7 @@ class _NavigationContainerState extends State<NavigationContainer> {
         
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('🎉 You have arrived at your destination!'),
+            content: Text('You have arrived at your destination!'),
             backgroundColor: Colors.green,
             duration: Duration(seconds: 3),
           ),
@@ -124,7 +121,6 @@ class _NavigationContainerState extends State<NavigationContainer> {
       widget.roomLocation.longitude,
     );
 
-    // Calculate center and bounds
     final centerLat = (_currentLocation.latitude + roomPos.latitude) / 2;
     final centerLng = (_currentLocation.longitude + roomPos.longitude) / 2;
     final center = LatLng(centerLat, centerLng);
@@ -134,7 +130,6 @@ class _NavigationContainerState extends State<NavigationContainer> {
 
     return Column(
       children: [
-        // Navigation Header
         Container(
           decoration: BoxDecoration(
             gradient: const LinearGradient(
@@ -248,7 +243,6 @@ class _NavigationContainerState extends State<NavigationContainer> {
         ),
         if (_isExpanded) ...[
           const SizedBox(height: 12),
-          // Map Container
           Container(
             decoration: BoxDecoration(
               border: Border.all(color: const Color(0xFFBFDBFE), width: 2),
@@ -273,7 +267,6 @@ class _NavigationContainerState extends State<NavigationContainer> {
                             'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                         userAgentPackageName: 'com.example.room_rental',
                       ),
-                      // Route line
                       PolylineLayer(
                         polylines: [
                           Polyline(
@@ -285,10 +278,8 @@ class _NavigationContainerState extends State<NavigationContainer> {
                           ),
                         ],
                       ),
-                      // Markers
                       MarkerLayer(
                         markers: [
-                          // User location marker (blue)
                           Marker(
                             point: _currentLocation,
                             width: 40,
@@ -313,7 +304,6 @@ class _NavigationContainerState extends State<NavigationContainer> {
                               ),
                             ),
                           ),
-                          // Room location marker (red)
                           Marker(
                             point: roomPos,
                             width: 40,
@@ -329,13 +319,11 @@ class _NavigationContainerState extends State<NavigationContainer> {
                     ],
                   ),
                 ),
-                // Controls Footer
                 Container(
                   color: Colors.grey[50],
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      // Destination Info
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
@@ -364,7 +352,6 @@ class _NavigationContainerState extends State<NavigationContainer> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      // Navigation Button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
