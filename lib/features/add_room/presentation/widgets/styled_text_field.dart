@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../app/theme/theme_extensions.dart';
 
 class StyledTextField extends StatelessWidget {
@@ -8,6 +9,7 @@ class StyledTextField extends StatelessWidget {
   final int maxLines;
   final String? Function(String?)? validator;
   final TextInputType keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
 
   const StyledTextField({
     super.key,
@@ -17,6 +19,7 @@ class StyledTextField extends StatelessWidget {
     this.maxLines = 1,
     this.validator,
     this.keyboardType = TextInputType.text,
+    this.inputFormatters,
   });
 
   @override
@@ -31,6 +34,7 @@ class StyledTextField extends StatelessWidget {
         controller: controller,
         maxLines: maxLines,
         keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
         style: TextStyle(color: context.textPrimary),
         decoration: InputDecoration(
           hintText: hintText,

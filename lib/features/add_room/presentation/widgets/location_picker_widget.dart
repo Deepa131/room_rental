@@ -25,11 +25,9 @@ class LocationPickerWidget extends ConsumerStatefulWidget {
 }
 
 class _LocationPickerWidgetState extends ConsumerState<LocationPickerWidget> {
-  // Confirmed location (not being edited)
   LocationCoords? _confirmedLocation;
   String _confirmedAddress = '';
-
-  // Draft location (being edited)
+ 
   LocationCoords? _draftLocation;
   String _draftAddress = '';
 
@@ -52,7 +50,6 @@ class _LocationPickerWidgetState extends ConsumerState<LocationPickerWidget> {
   @override
   void didUpdateWidget(LocationPickerWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Update location when defaultLocation prop changes (e.g., when editing room data loads)
     if (widget.defaultLocation != oldWidget.defaultLocation) {
       setState(() {
         _confirmedLocation = widget.defaultLocation;
@@ -76,7 +73,6 @@ class _LocationPickerWidgetState extends ConsumerState<LocationPickerWidget> {
   Future<void> _hydrateAddress() async {
     if (_confirmedLocation == null) return;
 
-    // If we already have an address, use it (don't overwrite with reverse geocode)
     if (_confirmedAddress.isNotEmpty &&
         _confirmedLocation!.address != null &&
         _confirmedLocation!.address!.isNotEmpty) {
@@ -147,7 +143,7 @@ class _LocationPickerWidgetState extends ConsumerState<LocationPickerWidget> {
       if (result == null) {
         setModalState(() {
           _searchError =
-              'No results found. Try "Kathmandu", "Patan", or "Pokhara"';
+              'No results found.';
           _isSearching = false;
         });
         return;
@@ -160,7 +156,6 @@ class _LocationPickerWidgetState extends ConsumerState<LocationPickerWidget> {
         _isSearching = false;
       });
 
-      // Move map to search result after this frame to avoid build-time updates
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         mapController.move(LatLng(result.latitude, result.longitude), 15);
@@ -214,7 +209,6 @@ class _LocationPickerWidgetState extends ConsumerState<LocationPickerWidget> {
   }
 
   Future<void> _showLocationPickerModal() async {
-    // Request permission BEFORE showing the modal (like camera/gallery)
     if (!mounted) return;
 
     final modalMapController = MapController();
@@ -228,7 +222,7 @@ class _LocationPickerWidgetState extends ConsumerState<LocationPickerWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Location permission is permanently denied. You can still pick a location manually.',
+            'Location permission is permanently denied.',
           ),
           backgroundColor: Colors.red,
         ),
@@ -246,7 +240,7 @@ class _LocationPickerWidgetState extends ConsumerState<LocationPickerWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Location Services are off. You can still pick manually.',
+            'Location Services are off.',
           ),
           backgroundColor: Colors.red,
         ),
@@ -276,7 +270,6 @@ class _LocationPickerWidgetState extends ConsumerState<LocationPickerWidget> {
 
     if (!mounted) return;
 
-    // Now show the modal
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -348,13 +341,11 @@ class _LocationPickerWidgetState extends ConsumerState<LocationPickerWidget> {
                         ],
                       ),
                     ),
-                    // Content
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
                           children: [
-                            // Search bar
                             Container(
                               margin: const EdgeInsets.only(bottom: 16),
                               child: Column(
@@ -429,8 +420,6 @@ class _LocationPickerWidgetState extends ConsumerState<LocationPickerWidget> {
                                 ],
                               ),
                             ),
-
-                            // Permission granted indicator
                             if (_permissionGranted &&
                                 _draftLocation != null &&
                                 _draftAddress.isNotEmpty)
@@ -478,8 +467,6 @@ class _LocationPickerWidgetState extends ConsumerState<LocationPickerWidget> {
                                   ],
                                 ),
                               ),
-
-                            // Map
                             Expanded(
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
@@ -516,7 +503,6 @@ class _LocationPickerWidgetState extends ConsumerState<LocationPickerWidget> {
                             ),
                             const SizedBox(height: 16),
 
-                            // Selected location display
                             if (_draftLocation != null)
                               Container(
                                 decoration: BoxDecoration(
@@ -547,7 +533,6 @@ class _LocationPickerWidgetState extends ConsumerState<LocationPickerWidget> {
                               ),
                             const SizedBox(height: 16),
 
-                            // Instructions
                             const Text(
                               'Tap on the map or drag the marker to update the location',
                               textAlign: TextAlign.center,
@@ -560,7 +545,6 @@ class _LocationPickerWidgetState extends ConsumerState<LocationPickerWidget> {
                         ),
                       ),
                     ),
-                    // Footer with buttons
                     Container(
                       decoration: BoxDecoration(
                         border: Border(
@@ -620,10 +604,11 @@ class _LocationPickerWidgetState extends ConsumerState<LocationPickerWidget> {
       children: [
         Text(
           widget.title,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF1F2937),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF1F2937),
+            letterSpacing: 0.3,
           ),
         ),
         const SizedBox(height: 8),

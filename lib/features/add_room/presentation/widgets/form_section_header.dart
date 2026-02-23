@@ -14,9 +14,10 @@ class FormSectionHeader extends StatelessWidget {
     return Text(
       title,
       style: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w600,
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
         color: context.textPrimary,
+        letterSpacing: 0.3,
       ),
     );
   }
