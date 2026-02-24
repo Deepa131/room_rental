@@ -7,7 +7,7 @@ class MyRoomCard extends StatelessWidget {
   final String title;
   final String location;
   final String roomType;
-  final String status; // e.g., 'Available', 'Rented'
+  final String status; 
   final String? imageUrl;
   final String? price;
   final VoidCallback? onTap;
@@ -296,16 +296,14 @@ class MyRoomCard extends StatelessWidget {
               : Colors.black.withOpacity(0.08),
         ),
         const SizedBox(height: 14),
-        // Toggle Availability Button - Premium Gradient Style
         _buildGradientButton(
           onTap: onToggleAvailability,
-          icon: isAvailable ? Icons.check_circle_rounded : Icons.lock_clock_rounded,
+          icon: isAvailable ? Icons.lock_clock_rounded : Icons.check_circle_rounded,
           label: isAvailable ? 'Mark as Rented' : 'Mark as Available',
           color: isAvailable ? AppColors.warning : AppColors.foundColor,
           context: context,
         ),
         const SizedBox(height: 12),
-        // Edit and Delete Buttons - Modern Outlined Style
         Row(
           children: [
             Expanded(
