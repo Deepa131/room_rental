@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:room_rental/app/theme/app_colors.dart';
 import 'package:room_rental/core/services/storage/user_session_service.dart';
 import 'package:room_rental/core/utils/my_snackbar.dart';
+import 'package:room_rental/core/utils/phone_validator.dart';
 import 'package:room_rental/core/widgets/my_button.dart';
 import 'package:room_rental/features/add_room/presentation/state/add_room_state.dart';
 import 'package:room_rental/features/add_room/presentation/view_model/add_room_viewmodel.dart';
@@ -496,9 +497,7 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                       LengthLimitingTextInputFormatter(10),
                     ],
                     validator: (v) {
-                      if (v == null || v.isEmpty) return 'Required';
-                      final digits = v.replaceAll(RegExp(r'\D'), '');
-                      return null;
+                      return PhoneValidator.validateNepalPhone(v);
                     },
                   ),
 
@@ -523,11 +522,12 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                                 style: const TextStyle(color: Colors.red),
                               ),
                               const SizedBox(height: 8),
-                              ElevatedButton(
+                              MyButton(
                                 onPressed: () {
                                   ref.read(typeViewmodelProvider.notifier).getAllTypes();
                                 },
-                                child: const Text('Retry'),
+                                text: 'Retry',
+                                color: Colors.red,
                               ),
                             ],
                           ),
