@@ -35,7 +35,6 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
     _pageController = PageController();
     _buildMediaItems();
     
-    // Load appointments to check for existing appointments
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userSession = ref.read(userSessionServiceProvider);
       final userId = userSession.getUserId();
@@ -208,7 +207,6 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
     final userSession = ref.read(userSessionServiceProvider);
     final userId = userSession.getUserId();
     
-    // Check if user already has an appointment for this room
     final appointments = ref.read(appointmentViewModelProvider).appointments;
     final hasExistingAppointment = appointments.any(
       (apt) => 
@@ -1084,7 +1082,6 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Top bar with title
                     Padding(
                       padding: const EdgeInsets.all(16),
                       child: Row(
