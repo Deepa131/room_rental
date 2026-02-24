@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:room_rental/app/theme/app_colors.dart';
 import 'package:room_rental/app/theme/theme_extensions.dart';
 import 'package:room_rental/core/utils/image_url_helper.dart';
+import 'package:room_rental/core/utils/phone_validator.dart';
+import 'package:room_rental/core/widgets/my_button.dart';
 import 'package:room_rental/core/services/storage/user_session_service.dart';
 import 'package:room_rental/features/add_room/domain/entities/add_room_entity.dart';
 import 'package:room_rental/features/appointment/domain/entities/appointment_entity.dart';
@@ -406,14 +408,7 @@ class _BookAppointmentPageState extends ConsumerState<BookAppointmentPage> {
                         LengthLimitingTextInputFormatter(10),
                       ],
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your phone number';
-                        }
-                        final digits = value.replaceAll(RegExp(r'\D'), '');
-                        if (digits.length != 10) {
-                          return 'Phone number must be 10 digits';
-                        }
-                        return null;
+                        return PhoneValidator.validateNepalPhone(value);
                       },
                     ),
                     const SizedBox(height: 24),
@@ -516,36 +511,11 @@ class _BookAppointmentPageState extends ConsumerState<BookAppointmentPage> {
                     ),
                     const SizedBox(height: 24),
 
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _submitAppointment,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          disabledBackgroundColor: Colors.grey,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text(
-                                'Confirm Appointment',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                      ),
+                    MyButton(
+                      onPressed: _submitAppointment,
+                      text: 'Confirm Appointment',
+                      color: AppColors.primary,
+                      isLoading: _isLoading,
                     ),
                     const SizedBox(height: 12),
                   ],
