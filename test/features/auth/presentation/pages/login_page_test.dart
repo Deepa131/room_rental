@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:room_rental/core/error/failures.dart';
+import 'package:room_rental/core/services/storage/user_session_service.dart';
 import 'package:room_rental/features/auth/domain/entities/auth_entity.dart';
 import 'package:room_rental/features/auth/domain/usecases/login_usecase.dart';
 import 'package:room_rental/features/auth/domain/usecases/get_current_user_usecase.dart';
@@ -29,6 +31,7 @@ void main() {
   late MockRegisterUsecase mockRegisterUsecase;
   late MockLogoutUsecase mockLogoutUsecase;
   late MockGetCurrentUserUsecase mockGetCurrentUserUsecase;
+  late SharedPreferences sharedPreferences;
 
   setUpAll(() {
     registerFallbackValue(
@@ -39,16 +42,19 @@ void main() {
     );
   });
 
-  setUp(() {
+  setUp(() async {
     mockLoginUsecase = MockLoginUsecase();
     mockRegisterUsecase = MockRegisterUsecase();
     mockLogoutUsecase = MockLogoutUsecase();
     mockGetCurrentUserUsecase = MockGetCurrentUserUsecase();
+    SharedPreferences.setMockInitialValues({});
+    sharedPreferences = await SharedPreferences.getInstance();
   });
 
   Widget createTestWidget() {
     return ProviderScope(
       overrides: [
+        sharedPreferencesProvider.overrideWithValue(sharedPreferences),
         loginUsecaseProvider.overrideWithValue(mockLoginUsecase),
         registerUsecaseProvider.overrideWithValue(mockRegisterUsecase),
         logoutUsecaseProvider.overrideWithValue(mockLogoutUsecase),
@@ -67,13 +73,13 @@ void main() {
       await tester.pumpWidget(createTestWidget());
 
       expect(find.text('RentEasy'), findsOneWidget);
-      expect(find.text('Login as RENTER'), findsOneWidget);
+      expect(find.text('Welcome back, renter'), findsOneWidget);
     });
 
     testWidgets('displays email and password fields', (tester) async {
       await tester.pumpWidget(createTestWidget());
 
-      expect(find.text('Email / Username'), findsOneWidget);
+      expect(find.text('Email Address'), findsOneWidget);
       expect(find.text('Password'), findsOneWidget);
     });
 

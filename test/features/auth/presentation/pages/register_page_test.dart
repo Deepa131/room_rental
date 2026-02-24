@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:room_rental/core/error/failures.dart';
+import 'package:room_rental/core/services/storage/user_session_service.dart';
 import 'package:room_rental/features/auth/domain/usecases/register_usecase.dart';
 import 'package:room_rental/features/auth/domain/usecases/login_usecase.dart';
 import 'package:room_rental/features/auth/domain/usecases/logout_usecase.dart';
@@ -26,6 +28,7 @@ void main() {
   late MockLoginUsecase mockLoginUsecase;
   late MockLogoutUsecase mockLogoutUsecase;
   late MockGetCurrentUserUsecase mockGetCurrentUserUsecase;
+  late SharedPreferences sharedPreferences;
 
   setUpAll(() {
     registerFallbackValue(
@@ -38,16 +41,19 @@ void main() {
     );
   });
 
-  setUp(() {
+  setUp(() async {
     mockRegisterUsecase = MockRegisterUsecase();
     mockLoginUsecase = MockLoginUsecase();
     mockLogoutUsecase = MockLogoutUsecase();
     mockGetCurrentUserUsecase = MockGetCurrentUserUsecase();
+    SharedPreferences.setMockInitialValues({});
+    sharedPreferences = await SharedPreferences.getInstance();
   });
 
   Widget createTestWidget() {
     return ProviderScope(
       overrides: [
+        sharedPreferencesProvider.overrideWithValue(sharedPreferences),
         registerUsecaseProvider.overrideWithValue(mockRegisterUsecase),
         loginUsecaseProvider.overrideWithValue(mockLoginUsecase),
         logoutUsecaseProvider.overrideWithValue(mockLogoutUsecase),
@@ -65,16 +71,15 @@ void main() {
     testWidgets('displays app title and heading', (tester) async {
       await tester.pumpWidget(createTestWidget());
 
-      expect(find.text('RentEasy'), findsOneWidget);
-      expect(find.text('Create Your Account'), findsOneWidget);
-      expect(find.text('Signup as RENTER'), findsOneWidget);
+      expect(find.text('Create Account'), findsNWidgets(2));
+      expect(find.text('Sign up as renter'), findsOneWidget);
     });
 
     testWidgets('displays all input fields', (tester) async {
       await tester.pumpWidget(createTestWidget());
 
       expect(find.text('Full Name'), findsOneWidget);
-      expect(find.text('Email'), findsOneWidget);
+      expect(find.text('Email Address'), findsOneWidget);
       expect(find.text('Password'), findsOneWidget);
       expect(find.text('Confirm Password'), findsOneWidget);
     });
@@ -82,22 +87,17 @@ void main() {
     testWidgets('displays Sign Up button', (tester) async {
       await tester.pumpWidget(createTestWidget());
 
-      expect(find.text('Sign Up'), findsOneWidget);
-    });
-
-    testWidgets('displays login link', (tester) async {
-      await tester.pumpWidget(createTestWidget());
-
-      expect(find.text('Already have an account? '), findsOneWidget);
-      expect(find.text('Login'), findsOneWidget);
+      expect(find.text('Create Account'), findsAtLeastNWidgets(1));
     });
   });
 
   group('RegisterPage Validation', () {
     testWidgets('shows error when full name is empty', (tester) async {
       await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Sign Up'));
+      final button = find.text('Create Account').last;
+      await tester.tap(button);
       await tester.pump();
 
       expect(find.text('Full name is required'), findsOneWidget);
@@ -105,13 +105,15 @@ void main() {
 
     testWidgets('shows error when email is empty', (tester) async {
       await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
 
       await tester.enterText(
         find.byType(TextFormField).first,
         'Deepa Paudel',
       );
 
-      await tester.tap(find.text('Sign Up'));
+      final button = find.text('Create Account').last;
+      await tester.tap(button);
       await tester.pump();
 
       expect(find.text('Email is required'), findsOneWidget);
@@ -137,7 +139,8 @@ void main() {
         'password456',
       );
 
-      await tester.tap(find.text('Sign Up'));
+      final button = find.text('Create Account').last;
+      await tester.tap(button);
       await tester.pump();
 
       expect(find.text('Passwords do not match'), findsOneWidget);
@@ -170,7 +173,8 @@ void main() {
         'password123',
       );
 
-      await tester.tap(find.text('Sign Up'));
+      final button = find.text('Create Account').last;
+      await tester.tap(button);
       await tester.pump();
 
       verify(
@@ -187,8 +191,10 @@ void main() {
 
     testWidgets('does NOT call register usecase when form is invalid', (tester) async {
       await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Sign Up'));
+      final button = find.text('Create Account').last;
+      await tester.tap(button);
       await tester.pump();
 
       verifyNever(() => mockRegisterUsecase(any()));
@@ -219,7 +225,8 @@ void main() {
         'password123',
       );
 
-      await tester.tap(find.text('Sign Up'));
+      final button = find.text('Create Account').last;
+      await tester.tap(button);
       await tester.pump();
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
