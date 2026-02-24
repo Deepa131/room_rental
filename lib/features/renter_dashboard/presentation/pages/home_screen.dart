@@ -1,323 +1,580 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:room_rental/core/utils/my_snackbar.dart';
-import 'package:room_rental/data/wishlist_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:room_rental/app/theme/app_colors.dart';
+import 'package:room_rental/app/theme/theme_extensions.dart';
+import 'package:room_rental/core/services/storage/user_session_service.dart';
+import 'package:room_rental/core/utils/image_url_helper.dart';
+import 'package:room_rental/features/add_room/domain/entities/add_room_entity.dart';
+import 'package:room_rental/features/add_room/presentation/state/add_room_state.dart';
+import 'package:room_rental/features/add_room/presentation/view_model/add_room_viewmodel.dart';
+import 'package:room_rental/features/renter_dashboard/presentation/pages/room_details_page.dart';
+import 'package:room_rental/features/room_type/presentation/state/room_type_state.dart';
+import 'package:room_rental/features/room_type/presentation/view_model/room_type_viewmodel.dart';
+import 'package:room_rental/features/wishlist/presentation/view_model/wishlist_view_model.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
+  String _selectedPriceRange = 'all';
+  String _selectedRoomType = 'all';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(addRoomViewModelProvider.notifier).getAllRooms();
+      ref.read(typeViewmodelProvider.notifier).getAllTypes();
+      
+      // Load wishlist
+      final userSession = ref.read(userSessionServiceProvider);
+      final userId = userSession.getUserId();
+      if (userId != null && userId.isNotEmpty) {
+        ref.read(wishlistViewModelProvider.notifier).loadWishlist(userId);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<AddRoomEntity> _getFilteredRooms(List<AddRoomEntity> rooms) {
+    final searchTerm = _searchController.text.trim().toLowerCase();
+    
+    return rooms.where((room) {
+      // Search filter
+      final matchesSearch = searchTerm.isEmpty ||
+          room.roomTitle.toLowerCase().contains(searchTerm) ||
+          room.location.toLowerCase().contains(searchTerm);
+
+      // Type filter
+      final matchesType = _selectedRoomType == 'all' ||
+          room.roomType.typeId == _selectedRoomType;
+
+      // Price filter
+      final price = room.monthlyPrice;
+      final matchesPrice = _selectedPriceRange == 'all' ||
+          (_selectedPriceRange == 'lt-5000' && price < 5000) ||
+          (_selectedPriceRange == '5000-10000' && price >= 5000 && price <= 10000) ||
+          (_selectedPriceRange == 'gt-10000' && price > 10000);
+
+      return matchesSearch && matchesType && matchesPrice;
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final addRoomState = ref.watch(addRoomViewModelProvider);
+    final roomTypeState = ref.watch(typeViewmodelProvider);
+    final wishlistState = ref.watch(wishlistViewModelProvider);  
+    final filteredRooms = _getFilteredRooms(addRoomState.availableRooms);
 
     return Scaffold(
-      backgroundColor: const Color(0xffdbeaf3),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(theme),
-              const SizedBox(height: 20),
-              _sectionTitle("Featured Areas"),
-              const SizedBox(height: 12),
-              _buildFeaturedAreas(),
-              const SizedBox(height: 24),
-              _sectionTitle("Available Rooms"),
-              const SizedBox(height: 14),
-
-              _roomCard(
-                image: "assets/images/room1.png",
-                title: "1BHK room in Kapan",
-                location: "Kapan, Kathmandu",
-                price: "NPR 8,000/month",
-                type: "1BHK",
+      backgroundColor: context.backgroundColor,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 140,
+            pinned: true,
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            snap: false,
+            floating: false,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.primaryLight,
+                      AppColors.primary,
+                    ],
+                  ),
+                ),
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Explore Rooms',
+                          style: const TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Find your perfect rental space',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white.withOpacity(0.85),
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-
-              _roomCard(
-                image: "assets/images/room1.png",
-                title: "Furnished Room in Koteshwor",
-                location: "Koteshwor, Kathmandu",
-                price: "NPR 6,000/month",
-                type: "Single Room",
-              ),
-
-              const SizedBox(height: 30),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: const BoxDecoration(
-        color: Color(0xffdbeaf3),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Find Your Room",
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 16),
-          _buildSearchField(),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildSearchField() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: TextField(
-        controller: _searchController,
-        decoration: const InputDecoration(
-          icon: Icon(Icons.search),
-          hintText: "Search rooms in Nepal...",
-          border: InputBorder.none,
-        ),
-      ),
-    );
-  }
-
-  Widget _sectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontFamily: 'OpenSans Bold',
-          fontSize: 18,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFeaturedAreas() {
-    return SizedBox(
-      height: 70,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.only(left: 20),
-        children: const [
-          _FeaturedArea(title: "Kathmandu", subtitle: "120+ rooms"),
-          _FeaturedArea(title: "Pokhara", subtitle: "45+ rooms"),
-          _FeaturedArea(title: "Lalitpur", subtitle: "80+ rooms"),
-        ],
-      ),
-    );
-  }
-
-  Widget _roomCard({
-    required String image,
-    required String title,
-    required String location,
-    required String price,
-    required String type,
-  }) {
-    bool isWishlisted = WishlistData.wishlistRooms.any(
-      (room) => room['title'] == title,
-    );
-
-    return StatefulBuilder(
-      builder: (context, setLocalState) {
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 10,
-                offset: Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(18),
-                ),
-                child: Image.asset(
-                  image,
-                  height: 160,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-
-              Padding(
-                padding: const EdgeInsets.all(14),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: _roomDetails(
-                        title,
-                        location,
-                        price,
-                        type,
-                      ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                    _wishlistIcon(
-                      isWishlisted,
-                      onTap: () {
-                        setLocalState(() {
-                          if (isWishlisted) {
-                            WishlistData.wishlistRooms.removeWhere(
-                              (room) => room['title'] == title,
-                            );
-                            showMySnackBar(
-                              context: context,
-                              message: "Removed from wishlist",
-                              color: Colors.red,
-                            );
-                          } else {
-                            WishlistData.wishlistRooms.add({
-                              'image': image,
-                              'title': title,
-                              'location': location,
-                              'price': price,
-                              'type': type,
-                            });
-                            showMySnackBar(
-                              context: context,
-                              message: "Added to wishlist",
-                            );
-                          }
-                          isWishlisted = !isWishlisted;
-                        });
-                      },
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _searchController,
+                          onChanged: (_) => setState(() {}),
+                          decoration: InputDecoration(
+                            hintText: 'Search rooms, location...',
+                            hintStyle: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[400],
+                            ),
+                            prefixIcon: Icon(
+                              Icons.search_rounded,
+                              color: Colors.grey[400],
+                              size: 20,
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[100],
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 13,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    value: _selectedPriceRange,
+                                    isExpanded: true,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _selectedPriceRange = value!;
+                                      });
+                                    },
+                                    items: const [
+                                      DropdownMenuItem(
+                                        value: 'all',
+                                        child: Text('All Prices'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'lt-5000',
+                                        child: Text('Below 5K'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: '5000-10000',
+                                        child: Text('5K - 10K'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'gt-10000',
+                                        child: Text('Above 10K'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+
+                            Expanded(
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    value: _selectedRoomType,
+                                    isExpanded: true,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _selectedRoomType = value!;
+                                      });
+                                    },
+                                    items: [
+                                      const DropdownMenuItem(
+                                        value: 'all',
+                                        child: Text('All Types'),
+                                      ),
+                                      if (roomTypeState.status == RoomTypeStatus.loaded)...roomTypeState.types.where(
+                                        (type) => type.status == 'active'
+                                      ).map(
+                                        (type) => DropdownMenuItem(
+                                          value: type.typeId,
+                                          child: Text(type.typeName),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Available Listings',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: context.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${filteredRooms.length} properties found',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: context.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '${filteredRooms.length}',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+          ),
+
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+            sliver: addRoomState.status == AddRoomStatus.loading ? SliverFillRemaining(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(
+                      color: Colors.blue,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Loading rooms...',
+                      style: TextStyle(
+                        color: context.textSecondary,
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _roomDetails(
-    String title,
-    String location,
-    String price,
-    String type,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontFamily: 'OpenSans Bold',
-            fontSize: 16,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          location,
-          style: const TextStyle(
-            fontFamily: 'OpenSans Regular',
-            fontSize: 13,
-            color: Colors.grey,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          price,
-          style: const TextStyle(
-            fontFamily: 'OpenSans Bold',
-            fontSize: 14,
-            color: Colors.blue,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          type,
-          style: const TextStyle(
-            fontFamily: 'OpenSans Italic',
-            fontSize: 13,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _wishlistIcon(bool isWishlisted, {required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Icon(
-        Icons.bookmark,
-        size: 36,
-        color: isWishlisted ? Colors.amber : Colors.black,
-      ),
-    );
-  }
-}
-
-class _FeaturedArea extends StatelessWidget {
-  final String title;
-  final String subtitle;
-
-  const _FeaturedArea({
-    required this.title,
-    required this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(right: 14),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontFamily: 'OpenSans Bold',
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: const TextStyle(
-              fontFamily: 'OpenSans Regular',
-              fontSize: 12,
-              color: Colors.grey,
+            ) : filteredRooms.isEmpty ? SliverFillRemaining(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.home_rounded,
+                      size: 64,
+                      color: Colors.grey[300],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No rooms found',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: context.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Try adjusting your filters',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: context.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ) : SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 1,
+                childAspectRatio: 1.1,
+                mainAxisSpacing: 16,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  return _buildRoomCard(
+                    context,
+                    filteredRooms[index],
+                    wishlistState,
+                  );
+                },
+                childCount: filteredRooms.length,
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildRoomCard(BuildContext context, AddRoomEntity room, dynamic wishlistState) {
+    final roomId = room.roomId ?? '';
+    final isWishlisted = wishlistState.wishlistRoomIds.contains(roomId);
+    final userSession = ref.read(userSessionServiceProvider);
+    final userId = userSession.getUserId();
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => RoomDetailsPage(room: room),
+          ),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image Section
+            Stack(
+              children: [
+                Container(
+                  height: 180,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                    color: Colors.grey[300],
+                  ),
+                  child: room.images != null && room.images!.isNotEmpty ? ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                    child: CachedNetworkImage(
+                      imageUrl: ImageUrlHelper.getImageUrl(room.images![0]),
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      errorWidget: (context, url, error) => Center(
+                        child: Icon(
+                          Icons.broken_image,
+                          color: Colors.grey[600],
+                          size: 48,
+                        ),
+                      ),
+                    ),
+                  ) : Center(
+                    child: Icon(
+                      Icons.image_not_supported,
+                      size: 48,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // Details Section
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              room.roomTitle,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: context.textPrimary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              room.location,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Wishlist Button
+                      InkWell(
+                        onTap: () async {
+                          if (roomId.isNotEmpty && userId != null && userId.isNotEmpty) {
+                            final isCurrentlyInWishlist = isWishlisted;
+                            final success = await ref.read(wishlistViewModelProvider.notifier).toggleWishlist(userId, roomId);
+                            
+                            if (success && mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    isCurrentlyInWishlist ? 'Removed from wishlist' : 'Added to wishlist'
+                                  ),
+                                  duration: const Duration(seconds: 2),
+                                  backgroundColor: isCurrentlyInWishlist ? Colors.orange[700] : Colors.green[700],
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(20),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Icon(
+                            isWishlisted ? Icons.bookmark : Icons.bookmark_border,
+                            color: isWishlisted ? Colors.amber[600] : Colors.grey[400],
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'NPR ${room.monthlyPrice.toStringAsFixed(0)}/month',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: context.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // View Details Button
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.25),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Text(
+                      'View Details',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
