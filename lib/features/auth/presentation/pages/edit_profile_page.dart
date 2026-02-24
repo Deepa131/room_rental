@@ -35,11 +35,8 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     _fullNameController = TextEditingController(text: userSession.getUserFullName() ?? '');
     _emailController = TextEditingController(text: userSession.getUserEmail() ?? '');
     
-    // Only use profile picture from current auth entity, not from cached session
-    // This prevents showing a previous user's profile picture for new accounts
     final rawProfilePicture = authState.authEntity?.profilePicture;
     
-    // Only set profile picture URL if it exists and is a valid user-uploaded image
     if (rawProfilePicture != null && 
         rawProfilePicture.isNotEmpty && 
         rawProfilePicture != 'default-profile.png' &&
@@ -67,7 +64,6 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     if (image != null) {
       setState(() {
         _selectedImage = File(image.path);
-        // Clear the removal flag since user is adding/changing image
         _pictureRemoved = false;
       });
       
@@ -78,34 +74,27 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     }
   }
 
-  // Future<void> _uploadProfilePicture() async {
-  //   if (_selectedImage == null) return;
-
-  //   final result = await ref
-  //       .read(authViewModelProvider.notifier)
-  //       .updateProfilePicture(_selectedImage!);
-
-  //   result.fold(
-  //     (failure) {
-  //       showMySnackBar(
-  //         context: context,
-  //         message: failure.message,
-  //         color: Colors.red,
-  //       );
-  //     },
-  //     (imageUrl) {
-  //       setState(() {
-  //         _profilePictureUrl = imageUrl;
-  //       });
-  //       showMySnackBar(
-  //         context: context,
-  //         message: 'Profile picture updated successfully',
-  //       );
-  //     },
-  //   );
-  // }
-
   Future<void> _removeProfilePicture() async {
+    if (_pictureRemoved) {
+      setState(() {
+        _pictureRemoved = false;
+        final authState = ref.read(authViewModelProvider);
+        final rawProfilePicture = authState.authEntity?.profilePicture;
+        if (rawProfilePicture != null && 
+            rawProfilePicture.isNotEmpty && 
+            rawProfilePicture != 'default-profile.png' &&
+            rawProfilePicture != 'null' &&
+            !rawProfilePicture.contains('default')) {
+          _profilePictureUrl = rawProfilePicture;
+        }
+      });
+      showMySnackBar(
+        context: context,
+        message: 'Photo removal cancelled',
+      );
+      return;
+    }
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -134,7 +123,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
 
     showMySnackBar(
       context: context,
-      message: 'Profile picture will be removed when you update your profile',
+      message: 'Profile picture will be removed when you update your profile. Click the button again to undo.',
     );
   }
 
@@ -155,22 +144,18 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       return;
     }
 
-    // Determine what picture to send
     final pictureToSend = _pictureRemoved ? '' : _profilePictureUrl;
 
     final updatedUser = AuthEntity(
       userId: userId,
       fullName: _fullNameController.text.trim(),
       email: _emailController.text.trim(),
-      password: '', // Password not being updated
+      password: '', 
       role: userRole,
       profilePicture: pictureToSend,
     );
 
-    // Pass the selected image file if user picked a new one
-    final result = await ref
-        .read(authViewModelProvider.notifier)
-        .updateProfile(userId, updatedUser, imageFile: _selectedImage);
+    final result = await ref.read(authViewModelProvider.notifier).updateProfile(userId, updatedUser, imageFile: _selectedImage);
 
     result.fold(
       (failure) {
@@ -299,7 +284,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
 
               const SizedBox(height: 16),
 
-              // Role (read-only)
+              // Role 
               TextFormField(
                 initialValue: userSession.getUserRole() ?? '',
                 decoration: InputDecoration(
@@ -321,26 +306,11 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               ),
 
               const SizedBox(height: 14),
-
-              // Remove Photo Button (only show if there's a profile picture)
-              if (_profilePictureUrl != null || _selectedImage != null)
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _removeProfilePicture,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red.shade100,
-                      foregroundColor: Colors.red,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Remove Photo',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ),
+              if (_profilePictureUrl != null || _selectedImage != null || _pictureRemoved)
+                MyButton(
+                  onPressed: _removeProfilePicture,
+                  text: _pictureRemoved ? 'Undo Remove Photo' : 'Remove Photo',
+                  color: _pictureRemoved ? Colors.orange.shade100 : const Color.fromARGB(255, 221, 79, 93),
                 ),
             ],
           ),
