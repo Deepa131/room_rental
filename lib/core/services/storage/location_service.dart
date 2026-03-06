@@ -52,21 +52,17 @@ class LocationService {
   }
 
   static Future<LocationPermissionStatus> requestLocationPermission() async {
-    // First check if location services are enabled
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       return LocationPermissionStatus.denied;
     }
 
-    // Check current permission status
     LocationPermission permission = await Geolocator.checkPermission();
     
-    // If permission is denied, request it
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
 
-    // Handle all permission states
     switch (permission) {
       case LocationPermission.whileInUse:
       case LocationPermission.always:
@@ -134,7 +130,7 @@ class LocationService {
     return null;
   }
 
-  /// Calculate distance between two coordinates in kilometers using Haversine formula
+  // Calculate distance between two coordinates in kilometers 
   static double calculateDistance(
     double lat1,
     double lon1,
@@ -161,7 +157,7 @@ class LocationService {
     return '${km.toStringAsFixed(1)}km';
   }
 
-  /// Estimate travel time (average speed: 40km/h)
+  /// Estimate travel time 
   static String estimateTravelTime(double distanceKm) {
     const avgSpeed = 40; // km/h
     final minutes = ((distanceKm / avgSpeed) * 60).toInt();
