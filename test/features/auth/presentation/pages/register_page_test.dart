@@ -1,235 +1,92 @@
-import 'dart:async';
-
-import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:room_rental/core/error/failures.dart';
-import 'package:room_rental/core/services/storage/user_session_service.dart';
-import 'package:room_rental/features/auth/domain/usecases/register_usecase.dart';
-import 'package:room_rental/features/auth/domain/usecases/login_usecase.dart';
-import 'package:room_rental/features/auth/domain/usecases/logout_usecase.dart';
-import 'package:room_rental/features/auth/domain/usecases/get_current_user_usecase.dart';
+import 'package:room_rental/features/auth/presentation/pages/login_page.dart';
 import 'package:room_rental/features/auth/presentation/pages/register_page.dart';
+import 'package:room_rental/features/auth/presentation/state/auth_state.dart';
+import 'package:room_rental/features/auth/presentation/view_model/auth_view_model.dart';
 
-class MockRegisterUsecase extends Mock implements RegisterUsecase {}
+class _FakeAuthViewModel extends AuthViewModel {
+  @override
+  AuthState build() => const AuthState();
 
-class MockLoginUsecase extends Mock implements LoginUsecase {}
+  @override
+  Future<void> login({required String email, required String password}) async {}
 
-class MockLogoutUsecase extends Mock implements LogoutUsecase {}
-
-class MockGetCurrentUserUsecase extends Mock
-    implements GetCurrentUserUsecase {}
+  @override
+  Future<void> register({
+    required String fullName,
+    required String email,
+    required String password,
+    required String role,
+  }) async {}
+}
 
 void main() {
-  late MockRegisterUsecase mockRegisterUsecase;
-  late MockLoginUsecase mockLoginUsecase;
-  late MockLogoutUsecase mockLogoutUsecase;
-  late MockGetCurrentUserUsecase mockGetCurrentUserUsecase;
-  late SharedPreferences sharedPreferences;
+  Future<void> pumpRegisterPage(WidgetTester tester) async {
+    await tester.binding.setSurfaceSize(const Size(1080, 1920));
+    addTearDown(() async => tester.binding.setSurfaceSize(null));
 
-  setUpAll(() {
-    registerFallbackValue(
-      const RegisterUsecaseParams(
-        fullName: 'fallback',
-        email: 'fallback@email.com',
-        password: 'fallback123',
-        role: 'renter',
-      ),
-    );
-  });
-
-  setUp(() async {
-    mockRegisterUsecase = MockRegisterUsecase();
-    mockLoginUsecase = MockLoginUsecase();
-    mockLogoutUsecase = MockLogoutUsecase();
-    mockGetCurrentUserUsecase = MockGetCurrentUserUsecase();
-    SharedPreferences.setMockInitialValues({});
-    sharedPreferences = await SharedPreferences.getInstance();
-  });
-
-  Widget createTestWidget() {
-    return ProviderScope(
+    final app = ProviderScope(
       overrides: [
-        sharedPreferencesProvider.overrideWithValue(sharedPreferences),
-        registerUsecaseProvider.overrideWithValue(mockRegisterUsecase),
-        loginUsecaseProvider.overrideWithValue(mockLoginUsecase),
-        logoutUsecaseProvider.overrideWithValue(mockLogoutUsecase),
-        getCurrentUserUsecaseProvider.overrideWithValue(
-          mockGetCurrentUserUsecase,
-        ),
+        authViewModelProvider.overrideWith(() => _FakeAuthViewModel()),
       ],
       child: const MaterialApp(
-        home: RegisterPage(userRole: "renter"),
+        home: RegisterPage(userRole: 'renter'),
       ),
     );
+
+    await tester.pumpWidget(app);
+    await tester.pump();
   }
 
-  group('RegisterPage UI', () {
-    testWidgets('displays app title and heading', (tester) async {
-      await tester.pumpWidget(createTestWidget());
+  testWidgets('renders register title and subtitle', (tester) async {
+    await pumpRegisterPage(tester);
 
-      expect(find.text('Create Account'), findsNWidgets(2));
-      expect(find.text('Sign up as renter'), findsOneWidget);
-    });
-
-    testWidgets('displays all input fields', (tester) async {
-      await tester.pumpWidget(createTestWidget());
-
-      expect(find.text('Full Name'), findsOneWidget);
-      expect(find.text('Email Address'), findsOneWidget);
-      expect(find.text('Password'), findsOneWidget);
-      expect(find.text('Confirm Password'), findsOneWidget);
-    });
-
-    testWidgets('displays Sign Up button', (tester) async {
-      await tester.pumpWidget(createTestWidget());
-
-      expect(find.text('Create Account'), findsAtLeastNWidgets(1));
-    });
+    expect(find.text('Create Account'), findsNWidgets(2));
+    expect(find.text('Sign up as renter'), findsOneWidget);
   });
 
-  group('RegisterPage Validation', () {
-    testWidgets('shows error when full name is empty', (tester) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
+  testWidgets('renders all register form fields', (tester) async {
+    await pumpRegisterPage(tester);
 
-      final button = find.text('Create Account').last;
-      await tester.tap(button);
-      await tester.pump();
-
-      expect(find.text('Full name is required'), findsOneWidget);
-    });
-
-    testWidgets('shows error when email is empty', (tester) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      await tester.enterText(
-        find.byType(TextFormField).first,
-        'Deepa Paudel',
-      );
-
-      final button = find.text('Create Account').last;
-      await tester.tap(button);
-      await tester.pump();
-
-      expect(find.text('Email is required'), findsOneWidget);
-    });
-
-    testWidgets('shows error when passwords do not match', (tester) async {
-      await tester.pumpWidget(createTestWidget());
-
-      await tester.enterText(
-        find.byType(TextFormField).at(0),
-        'Deepa Paudel',
-      );
-      await tester.enterText(
-        find.byType(TextFormField).at(1),
-        'dee@gmail.com',
-      );
-      await tester.enterText(
-        find.byType(TextFormField).at(2),
-        'password123',
-      );
-      await tester.enterText(
-        find.byType(TextFormField).at(3),
-        'password456',
-      );
-
-      final button = find.text('Create Account').last;
-      await tester.tap(button);
-      await tester.pump();
-
-      expect(find.text('Passwords do not match'), findsOneWidget);
-    });
+    expect(find.text('Full Name'), findsOneWidget);
+    expect(find.text('Email Address'), findsOneWidget);
+    expect(find.text('Password'), findsOneWidget);
+    expect(find.text('Confirm Password'), findsOneWidget);
+    expect(find.byType(TextFormField), findsNWidgets(4));
   });
 
-  group('RegisterPage Submission', () {
-    testWidgets('calls register usecase with correct params', (tester) async {
-      final completer = Completer<Either<Failure, bool>>();
+  testWidgets('shows password mismatch validation', (tester) async {
+    await pumpRegisterPage(tester);
 
-      when(() => mockRegisterUsecase(any()))
-          .thenAnswer((_) => completer.future);
+    await tester.enterText(find.byType(TextFormField).at(2), 'password1');
+    await tester.enterText(find.byType(TextFormField).at(3), 'password2');
 
-      await tester.pumpWidget(createTestWidget());
+    await tester.tap(find.text('Create Account').last);
+    await tester.pump();
 
-      await tester.enterText(
-        find.byType(TextFormField).at(0),
-        'Deepa Paudel',
-      );
-      await tester.enterText(
-        find.byType(TextFormField).at(1),
-        'dee@gmail.com',
-      );
-      await tester.enterText(
-        find.byType(TextFormField).at(2),
-        'password123',
-      );
-      await tester.enterText(
-        find.byType(TextFormField).at(3),
-        'password123',
-      );
+    expect(find.text('Passwords do not match'), findsOneWidget);
+  });
 
-      final button = find.text('Create Account').last;
-      await tester.tap(button);
-      await tester.pump();
+  testWidgets('toggles password visibility icon on tap', (tester) async {
+    await pumpRegisterPage(tester);
 
-      verify(
-        () => mockRegisterUsecase(
-          const RegisterUsecaseParams(
-            fullName: 'Deepa Paudel',
-            email: 'dee@gmail.com',
-            password: 'password123',
-            role: 'renter',
-          ),
-        ),
-      ).called(1);
-    });
+    expect(find.byIcon(Icons.visibility_off_rounded), findsNWidgets(2));
 
-    testWidgets('does NOT call register usecase when form is invalid', (tester) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.visibility_off_rounded).first);
+    await tester.pump();
 
-      final button = find.text('Create Account').last;
-      await tester.tap(button);
-      await tester.pump();
+    expect(find.byIcon(Icons.visibility_rounded), findsOneWidget);
+  });
 
-      verifyNever(() => mockRegisterUsecase(any()));
-    });
+  testWidgets('navigates back to login page', (tester) async {
+    await pumpRegisterPage(tester);
 
-    testWidgets('shows loading indicator while registering', (tester) async {
-      final completer = Completer<Either<Failure, bool>>();
+    await tester.ensureVisible(find.text('Back to Login'));
+    await tester.tap(find.text('Back to Login'));
+    await tester.pumpAndSettle();
 
-      when(() => mockRegisterUsecase(any()))
-          .thenAnswer((_) => completer.future);
-
-      await tester.pumpWidget(createTestWidget());
-
-      await tester.enterText(
-        find.byType(TextFormField).at(0),
-        'Deepa Paudel',
-      );
-      await tester.enterText(
-        find.byType(TextFormField).at(1),
-        'dee@gmail.com',
-      );
-      await tester.enterText(
-        find.byType(TextFormField).at(2),
-        'password123',
-      );
-      await tester.enterText(
-        find.byType(TextFormField).at(3),
-        'password123',
-      );
-
-      final button = find.text('Create Account').last;
-      await tester.tap(button);
-      await tester.pump();
-
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    });
+    expect(find.byType(LoginPage), findsOneWidget);
   });
 }

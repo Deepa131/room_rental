@@ -43,4 +43,68 @@ void main() {
     await tester.pump();
     expect(tapped, isTrue);
   });
+
+  testWidgets('displays different icons correctly', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RoleCard(
+            icon: Icons.home,
+            title: 'Owner',
+            subtitle: 'Manage properties',
+            color: Colors.green,
+            onTap: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.home), findsOneWidget);
+    expect(find.byIcon(Icons.person), findsNothing);
+  });
+
+  testWidgets('renders with long subtitle text', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RoleCard(
+            icon: Icons.business,
+            title: 'Agent',
+            subtitle: 'Connect renters with property owners and manage bookings',
+            color: Colors.orange,
+            onTap: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Connect renters with property owners and manage bookings'), findsOneWidget);
+  });
+
+  testWidgets('triggers onTap when tapping anywhere on card', (tester) async {
+    var tapCount = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RoleCard(
+            icon: Icons.apartment,
+            title: 'Manager',
+            subtitle: 'Manage multiple properties',
+            color: Colors.purple,
+            onTap: () => tapCount++,
+          ),
+        ),
+      ),
+    );
+
+    // Tap on the icon
+    await tester.tap(find.byIcon(Icons.apartment));
+    await tester.pump();
+    expect(tapCount, 1);
+
+    // Tap on the subtitle
+    await tester.tap(find.text('Manage multiple properties'));
+    await tester.pump();
+    expect(tapCount, 2);
+  });
 }
