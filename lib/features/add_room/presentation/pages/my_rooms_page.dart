@@ -46,27 +46,102 @@ class _MyRoomsPageState extends ConsumerState<MyRoomsPage>
     final bookedRooms = state.bookedRooms;
 
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(context),
-            _buildTabBar(context, availableRooms.length, bookedRooms.length),
-            const SizedBox(height: 20),
-            Expanded(
-              child: state.status == AddRoomStatus.loading
-                  ? Center(
-                      child: CircularProgressIndicator(color: AppColors.primary),
-                    )
-                  : TabBarView(
-                      controller: _tabController,
+      backgroundColor: context.backgroundColor,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 130,
+            pinned: true,
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Colors.blue, Colors.blue.shade600],
+                  ),
+                ),
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildRoomList(availableRooms, true),
-                        _buildRoomList(bookedRooms, false),
+                        Text(
+                          'My Rooms',
+                          style: const TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Manage your listings',
+                          style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.85)),
+                        ),
                       ],
                     ),
+                  ),
+                ),
+              ),
             ),
-          ],
-        ),
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(50),
+              child: Container(
+                color: context.backgroundColor,
+                child: TabBar(
+                  controller: _tabController,
+                  indicator: UnderlineTabIndicator(
+                    borderSide: const BorderSide(color: AppColors.primary, width: 3),
+                    insets: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                  labelColor: AppColors.primary,
+                  unselectedLabelColor: Colors.grey[600],
+                  labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  tabs: [
+                    Tab(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.check_circle_outline_rounded, size: 18),
+                          const SizedBox(width: 6),
+                          Text('Available (${availableRooms.length})'),
+                        ],
+                      ),
+                    ),
+                    Tab(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.lock_rounded, size: 18),
+                          const SizedBox(width: 6),
+                          Text('Rented (${bookedRooms.length})'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          SliverFillRemaining(
+            child: state.status == AddRoomStatus.loading
+                ? Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  )
+                : TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildRoomList(context, availableRooms, true),
+                      _buildRoomList(context, bookedRooms, false),
+                    ],
+                  ),
+          ),
+        ],
       ),
     );
   }
@@ -167,7 +242,7 @@ class _MyRoomsPageState extends ConsumerState<MyRoomsPage>
     );
   }
 
-  Widget _buildRoomList(List rooms, bool isAvailable) {
+  Widget _buildRoomList(BuildContext context, List rooms, bool isAvailable) {
     if (rooms.isEmpty) {
       return Center(
         child: Column(
@@ -205,7 +280,7 @@ class _MyRoomsPageState extends ConsumerState<MyRoomsPage>
           child: MyRoomCard(
             title: room.roomTitle,
             location: room.location,
-            roomType: room.roomType.name,
+            roomType: room.roomType.typeName,
             status: status,
             imageUrl: room.images != null && room.images!.isNotEmpty
                 ? room.images!.first

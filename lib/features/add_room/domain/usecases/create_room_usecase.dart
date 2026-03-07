@@ -18,6 +18,7 @@ class CreateRoomParams extends Equatable {
   final String? description;
   final List<String>? images;
   final List<String>? videos;
+  final Map<String, dynamic>? locationCoords;
 
   const CreateRoomParams({
     required this.ownerId,
@@ -29,6 +30,7 @@ class CreateRoomParams extends Equatable {
     this.description,
     this.images,
     this.videos,
+    this.locationCoords,
   });
 
   @override
@@ -42,6 +44,7 @@ class CreateRoomParams extends Equatable {
         description,
         images,
         videos,
+        locationCoords,
       ];
 }
 
@@ -64,6 +67,13 @@ class CreateRoomUsecase implements UsecaseWithParams<bool, CreateRoomParams> {
       roomTitle: params.roomTitle,
       monthlyPrice: params.monthlyPrice,
       location: params.location,
+      locationCoords: params.locationCoords != null
+          ? LocationCoordsEntity(
+              latitude: params.locationCoords!['latitude'] as double,
+              longitude: params.locationCoords!['longitude'] as double,
+              address: params.locationCoords!['address'] as String?,
+            )
+          : null,
       roomType: params.roomType,
       description: params.description,
       images: params.images,

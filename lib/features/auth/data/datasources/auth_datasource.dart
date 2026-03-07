@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:room_rental/features/auth/data/models/auth_api_model.dart';
 import 'package:room_rental/features/auth/data/models/auth_hive_model.dart';
 
@@ -15,4 +16,7 @@ abstract interface class IAuthRemoteDatasource {
   Future<AuthApiModel> register(AuthApiModel user);
   Future<AuthApiModel?> login(String email, String password);
   Future<AuthApiModel?> getUserById(String userId);
+  Future<bool> resetPassword(String token, String password);
+  Future<AuthApiModel> updateProfile(String id, AuthApiModel user, {File? imageFile});
+  Future<String> updateProfilePicture(File image);
 }

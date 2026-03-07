@@ -5,6 +5,8 @@ import 'package:room_rental/core/constants/auth_hive_constants.dart';
 import 'package:room_rental/features/add_room/data/models/add_room_hive_model.dart';
 import 'package:room_rental/features/auth/data/models/auth_hive_model.dart';
 import 'package:room_rental/features/room_type/data/models/room_type_hive_model.dart';
+import 'package:room_rental/features/wishlist/data/models/wishlist_hive_model.dart';
+import 'package:room_rental/features/appointment/data/models/appointment_hive_model.dart';
 
 final hiveServiceProvider = Provider<HiveService>((ref) {
   return HiveService();
@@ -29,14 +31,14 @@ class HiveService {
     }
 
     final dummyRoomTypes = [
-      RoomTypeHiveModel(typeName: 'Single room'),
-      RoomTypeHiveModel(typeName: '1 BHK'),
-      RoomTypeHiveModel(typeName: '2 BHK'),
-      RoomTypeHiveModel(typeName: 'Studio room'),
+      RoomTypeHiveModel(typeId: '0', typeName: 'Single room'),
+      RoomTypeHiveModel(typeId: '1', typeName: '1 BHK'),
+      RoomTypeHiveModel(typeId: '2', typeName: '2 BHK'),
+      RoomTypeHiveModel(typeId: '3', typeName: 'Studio room'),
     ];
 
-    for (var type in dummyRoomTypes) {
-      await typeBox.put(type.typeId, type);
+    for (int i = 0; i < dummyRoomTypes.length; i++) {
+      await typeBox.put(i, dummyRoomTypes[i]);
     }
   }
 
@@ -51,6 +53,12 @@ class HiveService {
     if (!Hive.isAdapterRegistered(AuthHiveConstants.addRoomTypeId)) {
       Hive.registerAdapter(AddRoomHiveModelAdapter());
     }
+    if (!Hive.isAdapterRegistered(AuthHiveConstants.wishlistTypeId)) {
+      Hive.registerAdapter(WishlistHiveModelAdapter());
+    }
+    if (!Hive.isAdapterRegistered(AuthHiveConstants.appointmentTypeId)) {
+      Hive.registerAdapter(AppointmentHiveModelAdapter());
+    }
   }
 
   // open boxes
@@ -58,6 +66,8 @@ class HiveService {
     await Hive.openBox<AuthHiveModel>(AuthHiveConstants.authTable);
     await Hive.openBox<RoomTypeHiveModel>(AuthHiveConstants.roomTypeTable);
     await Hive.openBox<AddRoomHiveModel>(AuthHiveConstants.addRoomTable);
+    await Hive.openBox<WishlistHiveModel>(AuthHiveConstants.wishlistTable);
+    await Hive.openBox<AppointmentHiveModel>(AuthHiveConstants.appointmentTable);
   }
 
   //close hive
@@ -118,11 +128,8 @@ class HiveService {
   }
 
   Future<bool> updateType(RoomTypeHiveModel type) async {
-    if (_typeBox.containsKey(type.typeId)) {
-      await _typeBox.put(type.typeId, type);
-      return true;
-    }
-    return false;
+    await _typeBox.put(type.typeId, type);
+    return true;
   }
 
   Future<void> deleteType(String typeId) async {

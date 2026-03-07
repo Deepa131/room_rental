@@ -47,6 +47,7 @@ dependencies:
   flutter_cache_manager: ^3.3.1
   video_thumbnail: ^0.5.3
   flutter_svg: ^2.0.10+1
+  video_player: ^2.9.2
  
   # Real-time Features
   web_socket_channel: ^3.0.3
@@ -62,8 +63,18 @@ dependencies:
  
   # Permissions
   permission_handler: ^12.0.1
+  geolocator: ^12.0.0
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  url_launcher: ^6.3.2
   equatable: ^2.0.7
   dartz: ^0.10.1
+  
+  # Biometric Authentication
+  local_auth: ^2.3.0
+  
+  # Sensors
+  sensors_plus: ^3.0.0
   get_it: ^9.2.0
   test_cov_console: ^0.2.2
   flutter_test:

@@ -19,6 +19,7 @@ class AddRoomHiveModelAdapter extends TypeAdapter<AddRoomHiveModel> {
     return AddRoomHiveModel(
       roomId: fields[0] as String?,
       ownerId: fields[1] as String?,
+      ownerName: fields[13] as String?,
       ownerContactNumber: fields[2] as String,
       roomTitle: fields[3] as String,
       monthlyPrice: fields[4] as double,
@@ -36,7 +37,7 @@ class AddRoomHiveModelAdapter extends TypeAdapter<AddRoomHiveModel> {
   @override
   void write(BinaryWriter writer, AddRoomHiveModel obj) {
     writer
-      ..writeByte(13)
+      ..writeByte(14)
       ..writeByte(0)
       ..write(obj.roomId)
       ..writeByte(1)
@@ -62,7 +63,9 @@ class AddRoomHiveModelAdapter extends TypeAdapter<AddRoomHiveModel> {
       ..writeByte(11)
       ..write(obj.status)
       ..writeByte(12)
-      ..write(obj.createdAt);
+      ..write(obj.createdAt)
+      ..writeByte(13)
+      ..write(obj.ownerName);
   }
 
   @override

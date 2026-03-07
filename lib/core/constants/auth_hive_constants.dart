@@ -14,4 +14,10 @@ class AuthHiveConstants {
 
   static const int addRoomTypeId = 3;
   static const String addRoomTable = "add_room_table";
+
+  static const int wishlistTypeId = 4;
+  static const String wishlistTable = "wishlist_table";
+
+  static const int appointmentTypeId = 5;
+  static const String appointmentTable = "appointment_table";
 }

@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/theme_extensions.dart';
+import '../../../../core/utils/image_url_helper.dart';
 
 class MediaUploadSection extends StatelessWidget {
   final List<File?> selectedMedia;
@@ -42,14 +44,20 @@ class MediaUploadSection extends StatelessWidget {
               _AddMediaButton(
                 onTap: onAddMedia,
               ),
-              if (selectedMedia.isNotEmpty)
+              if (selectedMedia.isNotEmpty || remoteUrls.isNotEmpty)
                 ...List.generate(
-                  selectedMedia.length,
+                  remoteUrls.length > selectedMedia.length
+                      ? remoteUrls.length
+                      : selectedMedia.length,
                   (index) => Padding(
                     padding: const EdgeInsets.only(left: 12),
                     child: _MediaPreview(
-                      file: selectedMedia[index],
-                      remoteUrl: remoteUrls[index],
+                      file: index < selectedMedia.length
+                          ? selectedMedia[index]
+                          : null,
+                      remoteUrl: index < remoteUrls.length
+                          ? remoteUrls[index]
+                          : '',
                       onRemove: () => onRemoveMedia(index),
                     ),
                   ),
@@ -137,9 +145,7 @@ class _MediaPreviewState extends State<_MediaPreview> {
   @override
   void initState() {
     super.initState();
-    if (_isVideo()) {
-      _thumbnailFuture = _generateThumbnail();
-    }
+    _thumbnailFuture = _isVideo() ? _generateThumbnail() : Future.value(null);
   }
 
   bool _isVideo() {
@@ -234,29 +240,20 @@ class _MediaPreviewState extends State<_MediaPreview> {
                         },
                       )
                     : widget.remoteUrl.isNotEmpty
-                        ? Image.network(
-                            widget.remoteUrl,
+                        ? CachedNetworkImage(
+                            imageUrl: ImageUrlHelper.getImageUrl(widget.remoteUrl),
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
+                            placeholder: (context, url) => Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            errorWidget: (context, url, error) {
                               return Container(
                                 color: Colors.grey[300],
                                 child: const Icon(
                                   Icons.broken_image,
                                   color: Colors.grey,
-                                ),
-                              );
-                            },
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) {
-                                return child;
-                              }
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes !=
-                                          null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
-                                      : null,
                                 ),
                               );
                             },

@@ -39,7 +39,6 @@ class AddRoomRemoteDatasource implements IAddRoomRemoteDataSource {
     );
 
     final imageUrl = response.data['data'];
-    print('DEBUG: Uploaded image URL: $imageUrl');
     return imageUrl;
   }
 
@@ -88,14 +87,26 @@ class AddRoomRemoteDatasource implements IAddRoomRemoteDataSource {
   }
 
   @override
+  @override
   Future<List<AddRoomApiModel>> getRoomsByOwner(String ownerId) async {
-    final response = await _apiClient.get(
-      ApiEndpoints.rooms,
-      queryParameters: {'ownerId': ownerId},
-    );
-
-    final data = response.data['data'] as List;
-    return data.map((json) => AddRoomApiModel.fromJson(json)).toList();
+    try {
+      final response = await _apiClient.get(
+        ApiEndpoints.roomsByOwner(ownerId),
+      );
+      
+      final data = response.data['data'] as List?;
+      if (data == null || data.isEmpty) {
+        return [];
+      }
+      
+      final rooms = data.map((json) {
+        return AddRoomApiModel.fromJson(json);
+      }).toList();
+      
+      return rooms;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override

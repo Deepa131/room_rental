@@ -40,6 +40,12 @@ class AppColors {
   static const Color error = Color(0xFFEF4444);
   static const Color info = Color(0xFF3B82F6);
 
+  // Appointment Status Colors
+  static const Color appointmentPending = Color(0xFFFFC107);
+  static const Color appointmentApproved = Color(0xFF8BC34A);
+  static const Color appointmentRejected = Color(0xFFEF4444);
+  static const Color appointmentCompleted = Color(0xFF3B82F6);
+
   // Login/Auth Colors (Blue theme)
   static const Color authPrimary = Color(0xFF2196F3);
 

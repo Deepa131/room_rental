@@ -2,9 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:dio_smart_retry/dio_smart_retry.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:room_rental/core/api/api_endpoints.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Provider for ApiClient
 final apiClientProvider = Provider<ApiClient>((ref) {
@@ -21,7 +21,6 @@ class ApiClient {
         connectTimeout: ApiEndpoints.connectionTimeout,
         receiveTimeout: ApiEndpoints.receiveTimeout,
         headers: {
-          'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
       ),
@@ -29,8 +28,6 @@ class ApiClient {
 
     // Add interceptors
     _dio.interceptors.add(_AuthInterceptor());
-
-    // Auto retry on network failures
     _dio.interceptors.add(
       RetryInterceptor(
         dio: _dio,
@@ -41,7 +38,6 @@ class ApiClient {
           Duration(seconds: 3),
         ],
         retryEvaluator: (error, attempt) {
-          // Retry on connection errors and timeouts, not on 4xx/5xx
           return error.type == DioExceptionType.connectionTimeout ||
               error.type == DioExceptionType.sendTimeout ||
               error.type == DioExceptionType.receiveTimeout ||
@@ -50,7 +46,6 @@ class ApiClient {
       ),
     );
 
-    // Only add logger in debug mode
     if (kDebugMode) {
       _dio.interceptors.add(
         PrettyDioLogger(
@@ -139,11 +134,10 @@ class ApiClient {
 
 // Auth Interceptor to add JWT token to requests
 class _AuthInterceptor extends Interceptor {
-  final _storage = const FlutterSecureStorage();
   static const String _tokenKey = 'auth_token';
 
   @override
-  void onRequest(
+  Future<void> onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
@@ -159,12 +153,17 @@ class _AuthInterceptor extends Interceptor {
 
     final isAuthEndpoint =
         options.path == ApiEndpoints.userLogin ||
-        options.path == ApiEndpoints.users;
+        options.path == ApiEndpoints.userRegister;
 
     if (!isPublicGet && !isAuthEndpoint) {
-      final token = await _storage.read(key: _tokenKey);
-      if (token != null) {
-        options.headers['Authorization'] = 'Bearer $token';
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString(_tokenKey);
+        if (token != null && token.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
+      } catch (e) {
+
       }
     }
 
@@ -172,12 +171,13 @@ class _AuthInterceptor extends Interceptor {
   }
 
   @override
-  void onError(DioException err, ErrorInterceptorHandler handler) {
-    // Handle 401 Unauthorized - token expired
+  Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode == 401) {
-      // Clear token and redirect to login
-      _storage.delete(key: _tokenKey);
-      // You can add navigation logic here or use a callback
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove(_tokenKey);
+      } catch (e) {
+      }
     }
     handler.next(err);
   }

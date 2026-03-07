@@ -70,20 +70,31 @@ class RoomTypeRepository implements IRoomTypeRepository {
 
   @override
   Future<Either<Failure, List<RoomTypeEntity>>> getAllTypes() async {
-    // Try local storage first
-    try {
-      final models = await _roomTypeLocalDataSource.getAllTypes();
-      final entities = RoomTypeHiveModel.toEntityList(models);
-      if (entities.isNotEmpty) {
-        return Right(entities); // Return local data if available
-      }
-    } catch (_) {}
-
-    // If no local data and internet available, try API
+    // If internet available, always try to fetch fresh data from API first
     if (await _networkInfo.isConnected) {
       try {
+        print('DEBUG RoomTypeRepository.getAllTypes() - Fetching fresh data from API');
         final apiModels = await _roomTypeRemoteDataSource.getAllTypes();
+        print('DEBUG RoomTypeRepository.getAllTypes() - API returned ${apiModels.length} models');
+        
+        // Sync API data with local Hive cache 
+        try {
+          for (var apiModel in apiModels) {
+            print('DEBUG RoomTypeRepository.getAllTypes() - Syncing API model: id=${apiModel.id}, typeName=${apiModel.typeName}');
+            final entity = apiModel.toEntity();
+            print('DEBUG RoomTypeRepository.getAllTypes() - After toEntity: typeId=${entity.typeId}, typeName=${entity.typeName}');
+            final hiveModel = RoomTypeHiveModel.fromEntity(entity);
+            print('DEBUG RoomTypeRepository.getAllTypes() - Saved to Hive: typeId=${hiveModel.typeId}, typeName=${hiveModel.typeName}');
+            await _roomTypeLocalDataSource.updateType(hiveModel);
+          }
+          print('DEBUG RoomTypeRepository.getAllTypes() - Successfully synced all API data to Hive');
+        } catch (e) {
+          print('DEBUG RoomTypeRepository.getAllTypes() - Warning: Failed to sync to Hive: $e');
+        }
+        
         final result = RoomTypeApiModel.toEntityList(apiModels);
+        print('DEBUG RoomTypeRepository.getAllTypes() - Converted to ${result.length} entities');
+        result.forEach((e) => print('  - typeId: ${e.typeId}, typeName: ${e.typeName}'));
         return Right(result);
       } on DioException catch (e) {
         String errorMessage = 'Failed to fetch room types';
@@ -96,6 +107,18 @@ class RoomTypeRepository implements IRoomTypeRepository {
           errorMessage = e.message!;
         }
         
+        print('DEBUG RoomTypeRepository.getAllTypes() - API error: $errorMessage');
+        
+        // Fallback to local data on API failure
+        try {
+          final models = await _roomTypeLocalDataSource.getAllTypes();
+          final entities = RoomTypeHiveModel.toEntityList(models);
+          print('DEBUG RoomTypeRepository.getAllTypes() - Falling back to ${entities.length} local entities');
+          if (entities.isNotEmpty) {
+            return Right(entities);
+          }
+        } catch (_) {}
+        
         return Left(
           ApiFailure(
             statusCode: e.response?.statusCode,
@@ -103,9 +126,22 @@ class RoomTypeRepository implements IRoomTypeRepository {
           ),
         );
       } catch (e) {
+        print('DEBUG RoomTypeRepository.getAllTypes() - Unexpected error: $e');
         return Left(LocalDatabaseFailure(message: e.toString()));
       }
     } else {
+      // No internet - use local data
+      print('DEBUG RoomTypeRepository.getAllTypes() - No internet, using local Hive data');
+      try {
+        final models = await _roomTypeLocalDataSource.getAllTypes();
+        final entities = RoomTypeHiveModel.toEntityList(models);
+        print('DEBUG RoomTypeRepository.getAllTypes() - Found ${entities.length} entities in local Hive');
+        entities.forEach((e) => print('  - typeId: ${e.typeId}, typeName: ${e.typeName}'));
+        if (entities.isNotEmpty) {
+          return Right(entities);
+        }
+      } catch (_) {}
+      
       return Left(LocalDatabaseFailure(message: 'No room types available and no internet connection'));
     }
   }

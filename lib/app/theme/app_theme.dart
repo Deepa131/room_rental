@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
+import 'app_button_styles.dart';
 
 class AppTheme {
   AppTheme._();
@@ -71,6 +72,10 @@ class AppTheme {
     ),
 
     dividerColor: AppColors.divider,
+
+    elevatedButtonTheme: AppButtonStyles.elevatedButtonTheme,
+    textButtonTheme: AppButtonStyles.textButtonTheme,
+    outlinedButtonTheme: AppButtonStyles.outlinedButtonTheme,
   );
 
   static ThemeData darkTheme = ThemeData(
@@ -140,5 +145,9 @@ class AppTheme {
     ),
 
     dividerColor: AppColors.darkDivider,
+
+    elevatedButtonTheme: AppButtonStyles.elevatedButtonTheme,
+    textButtonTheme: AppButtonStyles.textButtonTheme,
+    outlinedButtonTheme: AppButtonStyles.outlinedButtonTheme,
   );
 }

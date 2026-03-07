@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,8 +12,6 @@ final networkInfoProvider = Provider<NetworkInfo>((ref) {
 class NetworkInfo implements INetworkInfo {
   final Connectivity _connectivity;
 
-  // NetworkInfo({required Connectivity connectivity}) : _connectivity = connectivity;
-
   NetworkInfo(this._connectivity);
 
   @override
@@ -28,14 +24,5 @@ class NetworkInfo implements INetworkInfo {
     // return true;
     // return await _isInternetConnected();
     return true;
-  }
-
-  Future<bool> _isInternetConnected() async {
-    try {
-      final result = await InternetAddress.lookup('google.com');
-      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-    } on SocketException {
-      return false;
-    }
   }
 }

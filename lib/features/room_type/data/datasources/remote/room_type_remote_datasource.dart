@@ -39,14 +39,20 @@ class RoomTypeRemoteDatasource implements IRoomTypeRemoteDataSource {
       dataList = response.data;
     }
 
+    print('DEBUG RoomTypeRemoteDatasource.getAllTypes() - Raw API response: ${response.data}');
     // Convert to List<Map<String, dynamic>> and parse
-    return (dataList as List).map((json) {
+    final models = dataList.map((json) {
       if (json is Map<String, dynamic>) {
-        return RoomTypeApiModel.fromJson(json);
+        print('DEBUG RoomTypeRemoteDatasource.getAllTypes() - Parsing JSON: $json');
+        final model = RoomTypeApiModel.fromJson(json);
+        print('DEBUG RoomTypeRemoteDatasource.getAllTypes() - Parsed model id: ${model.id}, typeName: ${model.typeName}');
+        return model;
       } else {
         return RoomTypeApiModel.fromJson(json as Map<String, dynamic>);
       }
     }).toList();
+    print('DEBUG RoomTypeRemoteDatasource.getAllTypes() - Total models parsed: ${models.length}');
+    return models;
   }
 
   @override

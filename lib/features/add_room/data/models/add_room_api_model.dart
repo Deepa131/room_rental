@@ -5,15 +5,52 @@ import 'package:room_rental/features/room_type/domain/entities/room_type_entity.
 part 'add_room_api_model.g.dart';
 
 @JsonSerializable()
+class LocationCoordsApiModel {
+  final double latitude;
+  final double longitude;
+  final String? address;
+
+  LocationCoordsApiModel({
+    required this.latitude,
+    required this.longitude,
+    this.address,
+  });
+
+  factory LocationCoordsApiModel.fromJson(Map<String, dynamic> json) =>
+      _$LocationCoordsApiModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$LocationCoordsApiModelToJson(this);
+
+  LocationCoordsEntity toEntity() {
+    return LocationCoordsEntity(
+      latitude: latitude,
+      longitude: longitude,
+      address: address,
+    );
+  }
+
+  factory LocationCoordsApiModel.fromEntity(LocationCoordsEntity entity) {
+    return LocationCoordsApiModel(
+      latitude: entity.latitude,
+      longitude: entity.longitude,
+      address: entity.address,
+    );
+  }
+}
+
+@JsonSerializable()
 class AddRoomApiModel {
   final String? id;
   final String? ownerId;
+  final String? ownerName;
   final String ownerContactNumber;
 
   final String roomTitle;
   final double monthlyPrice;
   final String location;
+  final LocationCoordsApiModel? locationCoords;
   final String roomType; 
+  final String? roomTypeName;
 
   final String? description;
   final List<String>? images;
@@ -28,11 +65,14 @@ class AddRoomApiModel {
   AddRoomApiModel({
     this.id,
     this.ownerId,
+    this.ownerName,
     required this.ownerContactNumber,
     required this.roomTitle,
     required this.monthlyPrice,
     required this.location,
+    this.locationCoords,
     required this.roomType,
+    this.roomTypeName,
     this.description,
     this.images,
     this.videos,
@@ -51,30 +91,60 @@ class AddRoomApiModel {
       'ownerContactNumber': ownerContactNumber,
       'isAvailable': isAvailable,
       if (ownerId != null) 'ownerId': ownerId,
+      if (locationCoords != null) 'locationCoords': locationCoords!.toJson(),
       if (description != null) 'description': description,
       if (images != null) 'images': images,
       if (videos != null) 'videos': videos,
     };
-    print('DEBUG AddRoomApiModel.toJson() - roomType value: $roomType');
     return json;
   }
 
   factory AddRoomApiModel.fromJson(Map<String, dynamic> json) {
     String? extractId(dynamic value) {
       if (value == null) return null;
-      if (value is Map) return value['_id'] as String?;
+      if (value is Map) return (value['_id'] ?? value['id']) as String?;
       return value as String?;
     }
+    
+    String? extractRoomTypeId(dynamic value) {
+      if (value == null) return null;
+      if (value is Map) {
+        return (value['id'] ?? value['_id']) as String?;
+      }
+      return value as String?;
+    }
+
+    String? extractRoomTypeName(dynamic value) {
+      if (value == null) return null;
+      if (value is Map) {
+        return value['typeName'] as String?;
+      }
+      return null;
+    }
+    
+    String? extractOwnerName(dynamic value) {
+      if (value == null) return null;
+      if (value is Map) {
+        return value['fullName'] as String?;
+      }
+      return null;
+    }
+    
     return AddRoomApiModel(
-      id: json['_id'] as String?,
+      id: (json['id'] ?? json['_id']) as String?,
       ownerId: extractId(json['ownerId']),
+      ownerName: extractOwnerName(json['ownerId']),
       ownerContactNumber: json['ownerContactNumber'] as String,
       roomTitle: json['roomTitle'] as String,
       monthlyPrice: (json['monthlyPrice'] as num).toDouble(),
       location: json['location'] as String,
-      roomType: json['roomType'] is Map
-          ? json['roomType']['_id'] as String
+      locationCoords: json['locationCoords'] != null
+          ? LocationCoordsApiModel.fromJson(json['locationCoords'] as Map<String, dynamic>)
+          : null,
+        roomType: json['roomType'] is Map
+          ? extractRoomTypeId(json['roomType'])!
           : json['roomType'] as String,
+        roomTypeName: extractRoomTypeName(json['roomType']),
       description: json['description'] as String?,
       images: json['images'] != null
           ? List<String>.from(json['images'])
@@ -97,11 +167,13 @@ class AddRoomApiModel {
     return AddRoomEntity(
       roomId: id,
       ownerId: ownerId,
+      ownerName: ownerName,
       ownerContactNumber: ownerContactNumber,
       roomTitle: roomTitle,
       monthlyPrice: monthlyPrice,
       location: location,
-      roomType: RoomTypeEntity(typeId: roomType, typeName: ''),
+      locationCoords: locationCoords?.toEntity(),
+      roomType: RoomTypeEntity(typeId: roomType, typeName: roomTypeName ?? ''),
       description: description,
       images: images,
       videos: videos,
@@ -112,8 +184,16 @@ class AddRoomApiModel {
   }
 
   factory AddRoomApiModel.fromEntity(AddRoomEntity entity) {
-    print('DEBUG AddRoomApiModel.fromEntity() - entity.roomType.typeId: ${entity.roomType.typeId}');
-    print('DEBUG AddRoomApiModel.fromEntity() - entity.roomType.typeName: ${entity.roomType.typeName}');
+    
+    bool isValidMongoId(String? id) {
+      if (id == null) return false;
+      return id.length == 24 && RegExp(r'^[a-f0-9]{24}$').hasMatch(id);
+    }
+    
+    final finalRoomType = isValidMongoId(entity.roomType.typeId) 
+        ? entity.roomType.typeId!
+        : entity.roomType.typeName;
+    
     return AddRoomApiModel(
       id: entity.roomId,
       ownerId: entity.ownerId,
@@ -121,7 +201,11 @@ class AddRoomApiModel {
       roomTitle: entity.roomTitle,
       monthlyPrice: entity.monthlyPrice,
       location: entity.location,
-      roomType: entity.roomType.typeName,
+      locationCoords: entity.locationCoords != null
+          ? LocationCoordsApiModel.fromEntity(entity.locationCoords!)
+          : null,
+      roomType: finalRoomType,
+      roomTypeName: entity.roomType.typeName,
       description: entity.description,
       images: entity.images,
       videos: entity.videos,
