@@ -31,7 +31,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(addRoomViewModelProvider.notifier).getAllRooms();
       ref.read(typeViewmodelProvider.notifier).getAllTypes();
-      
+
       // Load wishlist
       final userSession = ref.read(userSessionServiceProvider);
       final userId = userSession.getUserId();
@@ -47,24 +47,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.dispose();
   }
 
+  int _getCrossAxisCount(double width) {
+    if (width >= 1200) return 3; // Large tablets/desktops
+    if (width >= 600) return 2; // Medium tablets
+    return 1; // Mobile phones
+  }
+
+  double _getChildAspectRatio(double width) {
+    if (width >= 1200) return 0.75; // Large tablets/desktops
+    if (width >= 600) return 0.85; // Medium tablets
+    return 1.1; // Mobile phones
+  }
+
   List<AddRoomEntity> _getFilteredRooms(List<AddRoomEntity> rooms) {
     final searchTerm = _searchController.text.trim().toLowerCase();
-    
+
     return rooms.where((room) {
       // Search filter
-      final matchesSearch = searchTerm.isEmpty ||
+      final matchesSearch =
+          searchTerm.isEmpty ||
           room.roomTitle.toLowerCase().contains(searchTerm) ||
           room.location.toLowerCase().contains(searchTerm);
 
       // Type filter
-      final matchesType = _selectedRoomType == 'all' ||
+      final matchesType =
+          _selectedRoomType == 'all' ||
           room.roomType.typeId == _selectedRoomType;
 
       // Price filter
       final price = room.monthlyPrice;
-      final matchesPrice = _selectedPriceRange == 'all' ||
+      final matchesPrice =
+          _selectedPriceRange == 'all' ||
           (_selectedPriceRange == 'lt-5000' && price < 5000) ||
-          (_selectedPriceRange == '5000-10000' && price >= 5000 && price <= 10000) ||
+          (_selectedPriceRange == '5000-10000' &&
+              price >= 5000 &&
+              price <= 10000) ||
           (_selectedPriceRange == 'gt-10000' && price > 10000);
 
       return matchesSearch && matchesType && matchesPrice;
@@ -75,8 +92,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final addRoomState = ref.watch(addRoomViewModelProvider);
     final roomTypeState = ref.watch(typeViewmodelProvider);
-    final wishlistState = ref.watch(wishlistViewModelProvider);  
+    final wishlistState = ref.watch(wishlistViewModelProvider);
     final filteredRooms = _getFilteredRooms(addRoomState.availableRooms);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final crossAxisCount = _getCrossAxisCount(screenWidth);
+    final childAspectRatio = _getChildAspectRatio(screenWidth);
+    final horizontalPadding = screenWidth >= 600 ? 24.0 : 16.0;
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
@@ -95,15 +116,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.primaryLight,
-                      AppColors.primary,
-                    ],
+                    colors: [AppColors.primaryLight, AppColors.primary],
                   ),
                 ),
                 child: SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -135,11 +156,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                20,
+                horizontalPadding,
+                0,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
+                    constraints: BoxConstraints(
+                      maxWidth: screenWidth >= 600 ? 800 : double.infinity,
+                    ),
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -186,8 +215,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           children: [
                             Expanded(
                               child: Container(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.grey[100],
                                   borderRadius: BorderRadius.circular(12),
@@ -227,8 +257,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                             Expanded(
                               child: Container(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.grey[100],
                                   borderRadius: BorderRadius.circular(12),
@@ -247,14 +278,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         value: 'all',
                                         child: Text('All Types'),
                                       ),
-                                      if (roomTypeState.status == RoomTypeStatus.loaded)...roomTypeState.types.where(
-                                        (type) => type.status == 'active'
-                                      ).map(
-                                        (type) => DropdownMenuItem(
-                                          value: type.typeId,
-                                          child: Text(type.typeName),
-                                        ),
-                                      ),
+                                      if (roomTypeState.status ==
+                                          RoomTypeStatus.loaded)
+                                        ...roomTypeState.types
+                                            .where(
+                                              (type) => type.status == 'active',
+                                            )
+                                            .map(
+                                              (type) => DropdownMenuItem(
+                                                value: type.typeId,
+                                                child: Text(type.typeName),
+                                              ),
+                                            ),
                                     ],
                                   ),
                                 ),
@@ -320,80 +355,89 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
 
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-            sliver: addRoomState.status == AddRoomStatus.loading ? SliverFillRemaining(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const CircularProgressIndicator(
-                      color: Colors.blue,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Loading rooms...',
-                      style: TextStyle(
-                        color: context.textSecondary,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ) : filteredRooms.isEmpty ? SliverFillRemaining(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.home_rounded,
-                      size: 64,
-                      color: Colors.grey[300],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No rooms found',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: context.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Try adjusting your filters',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: context.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ) : SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 1,
-                childAspectRatio: 1.1,
-                mainAxisSpacing: 16,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  return _buildRoomCard(
-                    context,
-                    filteredRooms[index],
-                    wishlistState,
-                  );
-                },
-                childCount: filteredRooms.length,
-              ),
+            padding: EdgeInsets.fromLTRB(
+              horizontalPadding,
+              0,
+              horizontalPadding,
+              20,
             ),
+            sliver: addRoomState.status == AddRoomStatus.loading
+                ? SliverFillRemaining(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const CircularProgressIndicator(color: Colors.blue),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Loading rooms...',
+                            style: TextStyle(
+                              color: context.textSecondary,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : filteredRooms.isEmpty
+                ? SliverFillRemaining(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.home_rounded,
+                            size: 64,
+                            color: Colors.grey[300],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No rooms found',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: context.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Try adjusting your filters',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: context.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      childAspectRatio: childAspectRatio,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      return _buildRoomCard(
+                        context,
+                        filteredRooms[index],
+                        wishlistState,
+                      );
+                    }, childCount: filteredRooms.length),
+                  ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildRoomCard(BuildContext context, AddRoomEntity room, dynamic wishlistState) {
+  Widget _buildRoomCard(
+    BuildContext context,
+    AddRoomEntity room,
+    dynamic wishlistState,
+  ) {
     final roomId = room.roomId ?? '';
     final isWishlisted = wishlistState.wishlistRoomIds.contains(roomId);
     final userSession = ref.read(userSessionServiceProvider);
@@ -403,9 +447,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => RoomDetailsPage(room: room),
-          ),
+          MaterialPageRoute(builder: (_) => RoomDetailsPage(room: room)),
         );
       },
       child: Container(
@@ -436,39 +478,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                     color: Colors.grey[300],
                   ),
-                  child: room.images != null && room.images!.isNotEmpty ? ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                    child: CachedNetworkImage(
-                      imageUrl: ImageUrlHelper.getImageUrl(room.images![0]),
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                      errorWidget: (context, url, error) => Center(
-                        child: Icon(
-                          Icons.broken_image,
-                          color: Colors.grey[600],
-                          size: 48,
+                  child: room.images != null && room.images!.isNotEmpty
+                      ? ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            topRight: Radius.circular(16),
+                          ),
+                          child: CachedNetworkImage(
+                            imageUrl: ImageUrlHelper.getImageUrl(
+                              room.images![0],
+                            ),
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            errorWidget: (context, url, error) => Center(
+                              child: Icon(
+                                Icons.broken_image,
+                                color: Colors.grey[600],
+                                size: 48,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Center(
+                          child: Icon(
+                            Icons.image_not_supported,
+                            size: 48,
+                            color: Colors.grey[600],
+                          ),
                         ),
-                      ),
-                    ),
-                  ) : Center(
-                    child: Icon(
-                      Icons.image_not_supported,
-                      size: 48,
-                      color: Colors.grey[600],
-                    ),
-                  ),
                 ),
               ],
             ),
             // Details Section
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -505,18 +551,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       // Wishlist Button
                       InkWell(
                         onTap: () async {
-                          if (roomId.isNotEmpty && userId != null && userId.isNotEmpty) {
+                          if (roomId.isNotEmpty &&
+                              userId != null &&
+                              userId.isNotEmpty) {
                             final isCurrentlyInWishlist = isWishlisted;
-                            final success = await ref.read(wishlistViewModelProvider.notifier).toggleWishlist(userId, roomId);
-                            
+                            final success = await ref
+                                .read(wishlistViewModelProvider.notifier)
+                                .toggleWishlist(userId, roomId);
+
                             if (success && mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    isCurrentlyInWishlist ? 'Removed from wishlist' : 'Added to wishlist'
+                                    isCurrentlyInWishlist
+                                        ? 'Removed from wishlist'
+                                        : 'Added to wishlist',
                                   ),
                                   duration: const Duration(seconds: 2),
-                                  backgroundColor: isCurrentlyInWishlist ? Colors.orange[700] : Colors.green[700],
+                                  backgroundColor: isCurrentlyInWishlist
+                                      ? Colors.orange[700]
+                                      : Colors.green[700],
                                 ),
                               );
                             }
@@ -526,8 +580,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: Padding(
                           padding: const EdgeInsets.all(8),
                           child: Icon(
-                            isWishlisted ? Icons.bookmark : Icons.bookmark_border,
-                            color: isWishlisted ? Colors.amber[600] : Colors.grey[400],
+                            isWishlisted
+                                ? Icons.bookmark
+                                : Icons.bookmark_border,
+                            color: isWishlisted
+                                ? Colors.amber[600]
+                                : Colors.grey[400],
                             size: 24,
                           ),
                         ),
@@ -543,7 +601,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       color: context.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   // View Details Button
                   Container(
                     width: double.infinity,

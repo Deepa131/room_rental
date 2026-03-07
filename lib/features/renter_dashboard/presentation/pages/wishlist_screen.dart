@@ -33,11 +33,25 @@ class _WishlistScreenState extends ConsumerState<WishlistScreen> {
     }
   }
 
+  int _getCrossAxisCount(double width) {
+    if (width >= 1200) return 3; // Large tablets/desktops
+    if (width >= 600) return 2; // Medium tablets
+    return 1; // Mobile phones
+  }
+
+  double _getChildAspectRatio(double width) {
+    if (width >= 1200) return 0.75; // Large tablets/desktops
+    if (width >= 600) return 0.85; // Medium tablets
+    return 1.15; // Mobile phones
+  }
+
   Future<void> _toggleWishlist(String roomId) async {
     final userSession = ref.read(userSessionServiceProvider);
     final userId = userSession.getUserId();
     if (userId != null && roomId.isNotEmpty) {
-      final success = await ref.read(wishlistViewModelProvider.notifier).toggleWishlist(userId, roomId);
+      final success = await ref
+          .read(wishlistViewModelProvider.notifier)
+          .toggleWishlist(userId, roomId);
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -53,6 +67,10 @@ class _WishlistScreenState extends ConsumerState<WishlistScreen> {
   @override
   Widget build(BuildContext context) {
     final wishlistState = ref.watch(wishlistViewModelProvider);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final crossAxisCount = _getCrossAxisCount(screenWidth);
+    final childAspectRatio = _getChildAspectRatio(screenWidth);
+    final horizontalPadding = screenWidth >= 600 ? 24.0 : 16.0;
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
@@ -148,13 +166,18 @@ class _WishlistScreenState extends ConsumerState<WishlistScreen> {
             )
           else
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                16,
+                horizontalPadding,
+                20,
+              ),
               sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 1,
-                  childAspectRatio: 1.15,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  childAspectRatio: childAspectRatio,
                   mainAxisSpacing: 12,
-                  crossAxisSpacing: 0,
+                  crossAxisSpacing: 12,
                 ),
                 delegate: SliverChildBuilderDelegate((context, index) {
                   final room = wishlistState.wishlistRooms[index];
@@ -187,34 +210,41 @@ class _WishlistScreenState extends ConsumerState<WishlistScreen> {
                                 ),
                                 color: Colors.grey[300],
                               ),
-                              child: room.images != null && room.images!.isNotEmpty ? ClipRRect(
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(14),
-                                  topRight: Radius.circular(14),
-                                ),
-                                child: CachedNetworkImage(
-                                  imageUrl: ImageUrlHelper.getImageUrl(
-                                    room.images![0],
-                                  ),
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) => const Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                  errorWidget: (context, url, error) => Center(
-                                    child: Icon(
-                                      Icons.image_not_supported_rounded,
-                                      color: Colors.grey[400],
+                              child:
+                                  room.images != null && room.images!.isNotEmpty
+                                  ? ClipRRect(
+                                      borderRadius: const BorderRadius.only(
+                                        topLeft: Radius.circular(14),
+                                        topRight: Radius.circular(14),
+                                      ),
+                                      child: CachedNetworkImage(
+                                        imageUrl: ImageUrlHelper.getImageUrl(
+                                          room.images![0],
+                                        ),
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) =>
+                                            const Center(
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            ),
+                                        errorWidget: (context, url, error) =>
+                                            Center(
+                                              child: Icon(
+                                                Icons
+                                                    .image_not_supported_rounded,
+                                                color: Colors.grey[400],
+                                              ),
+                                            ),
+                                      ),
+                                    )
+                                  : Center(
+                                      child: Icon(
+                                        Icons.image_not_supported,
+                                        color: Colors.grey[400],
+                                        size: 40,
+                                      ),
                                     ),
-                                  ),
-                                ),
-                              ) : Center(
-                                child: Icon(
-                                  Icons.image_not_supported,
-                                  color: Colors.grey[400],
-                                  size: 40,
-                                ),
-                              ),
                             ),
                             // Bookmark Button
                             Positioned(
@@ -252,7 +282,7 @@ class _WishlistScreenState extends ConsumerState<WishlistScreen> {
                         // Room Info
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                            padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -294,7 +324,7 @@ class _WishlistScreenState extends ConsumerState<WishlistScreen> {
                                     color: AppColors.primary,
                                   ),
                                 ),
-                                const SizedBox(height: 12),
+                                const SizedBox(height: 8),
                                 MyButton(
                                   onPressed: () {
                                     Navigator.push(
@@ -315,8 +345,7 @@ class _WishlistScreenState extends ConsumerState<WishlistScreen> {
                       ],
                     ),
                   );
-                }, 
-                childCount: wishlistState.wishlistRooms.length),
+                }, childCount: wishlistState.wishlistRooms.length),
               ),
             ),
         ],
