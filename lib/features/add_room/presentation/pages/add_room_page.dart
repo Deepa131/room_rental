@@ -462,14 +462,22 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
 
                   StyledTextField(
                     controller: _priceController,
-                    hintText: 'Monthly price',
+                    hintText: 'Monthly price ',
                     keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                    ],
                     validator: (v) {
                       if (v == null || v.isEmpty) return 'Required';
-                      final price = double.tryParse(v);
+                      // Remove Rs prefix if present
+                      String cleanValue = v.trim();
+                      if (cleanValue.startsWith('Rs')) {
+                        cleanValue = cleanValue.replaceFirst(RegExp(r'^Rs\.?\s*'), '');
+                      }
+                      final price = double.tryParse(cleanValue);
                       if (price == null) return 'Invalid price';
-                      if (price < 1000) return 'Price must be at least 1000';
-                      if (price > 1000000) return 'Price cannot exceed 1000000';
+                      if (price < 1000) return 'Price must be at least Rs. 1,000';
+                      if (price > 1000000) return 'Price cannot exceed Rs. 10,00,000';
                       return null;
                     },
                   ),

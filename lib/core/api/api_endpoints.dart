@@ -40,13 +40,13 @@ class ApiEndpoints {
   static String typeById(String id) => '/room-types/$id';
 
   // Room endpoints
-  static const String rooms = '/rooms';
-  static String roomById(String id) => '/rooms/$id';
-  static String roomsByOwner(String ownerId) => '/rooms/owner/$ownerId';
-  static String updateRoom(String id) => '/rooms/$id';
-  static String deleteRoom(String id) => '/rooms/$id';
-  static const String uploadRoomImage = '/rooms/upload-image';
-  static const String uploadRoomVideo = '/rooms/upload-video';
+  static const String rooms = '/add-room';
+  static String roomById(String id) => '/add-room/$id';
+  static String roomsByOwner(String ownerId) => '/add-room/owner/$ownerId';
+  static String updateRoom(String id) => '/add-room/$id';
+  static String deleteRoom(String id) => '/add-room/$id';
+  static const String uploadRoomImage = '/add-room/upload-image';
+  static const String uploadRoomVideo = '/add-room/upload-video';
 
   // Appointment endpoints
   static const String bookAppointment = '/appointments/book';

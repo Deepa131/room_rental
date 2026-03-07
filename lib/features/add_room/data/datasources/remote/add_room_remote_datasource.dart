@@ -91,8 +91,7 @@ class AddRoomRemoteDatasource implements IAddRoomRemoteDataSource {
   Future<List<AddRoomApiModel>> getRoomsByOwner(String ownerId) async {
     try {
       final response = await _apiClient.get(
-        ApiEndpoints.rooms,
-        queryParameters: {'ownerId': ownerId},
+        ApiEndpoints.roomsByOwner(ownerId),
       );
       
       final data = response.data['data'] as List?;
