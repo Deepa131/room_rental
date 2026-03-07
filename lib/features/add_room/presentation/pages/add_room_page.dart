@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:video_compress/video_compress.dart';
 import 'package:room_rental/app/theme/app_colors.dart';
 import 'package:room_rental/core/services/storage/user_session_service.dart';
 import 'package:room_rental/core/utils/my_snackbar.dart';
@@ -44,6 +45,26 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
   final List<File?> _localImageFiles = [];
   final List<File?> _localVideoFiles = [];
   final ImagePicker _picker = ImagePicker();
+
+  Future<File?> _compressVideoForUpload(File sourceVideo) async {
+    try {
+      final info = await VideoCompress.compressVideo(
+        sourceVideo.path,
+        quality: VideoQuality.LowQuality,
+        includeAudio: true,
+        deleteOrigin: false,
+      );
+
+      final compressedPath = info?.file?.path;
+      if (compressedPath != null && compressedPath.isNotEmpty) {
+        return File(compressedPath);
+      }
+    } catch (_) {
+      // Handled by caller with a user-facing message.
+    }
+
+    return null;
+  }
 
   @override
   void initState() {
@@ -104,12 +125,12 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
 
     setState(() {
       _localImageFiles.add(imageFile);
-      _imageUrls.add(
-        '',
-      ); 
+      _imageUrls.add('');
     });
 
-    final url = await ref.read(addRoomViewModelProvider.notifier).uploadRoomImage(imageFile);
+    final url = await ref
+        .read(addRoomViewModelProvider.notifier)
+        .uploadRoomImage(imageFile);
 
     if (url != null) {
       setState(() {
@@ -137,16 +158,29 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
     );
     if (file == null) return;
 
-    final videoFile = File(file.path);
+    final originalVideoFile = File(file.path);
+    final compressedVideoFile = await _compressVideoForUpload(
+      originalVideoFile,
+    );
+
+    if (compressedVideoFile == null) {
+      showMySnackBar(
+        context: context,
+        message:
+            'Video compression failed. Please try again with a shorter video.',
+        color: Colors.red,
+      );
+      return;
+    }
 
     setState(() {
-      _localVideoFiles.add(videoFile);
-      _videoUrls.add(
-        '',
-      ); 
+      _localVideoFiles.add(compressedVideoFile);
+      _videoUrls.add('');
     });
 
-    final url = await ref.read(addRoomViewModelProvider.notifier).uploadRoomVideo(videoFile);
+    final url = await ref
+        .read(addRoomViewModelProvider.notifier)
+        .uploadRoomVideo(compressedVideoFile);
 
     if (url != null) {
       setState(() {
@@ -161,6 +195,17 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
     }
   }
 
+  @override
+  void dispose() {
+    VideoCompress.dispose();
+    _titleController.dispose();
+    _priceController.dispose();
+    _locationController.dispose();
+    _contactController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
   void _showMediaPicker() {
     MediaPickerBottomSheet.show(
       context,
@@ -169,6 +214,7 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
       onVideoTap: _pickVideo,
     );
   }
+
   void _populateFormFields(dynamic room) {
     setState(() {
       _titleController.text = room.roomTitle ?? '';
@@ -289,41 +335,48 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
     final isEditMode = widget.roomId != null;
 
     if (isEditMode) {
-      await ref.read(addRoomViewModelProvider.notifier).updateRoom(
-        roomId: widget.roomId!,
-        ownerId: ownerId,
-        ownerContactNumber: _contactController.text.trim(),
-        roomTitle: _titleController.text.trim(),
-        monthlyPrice: monthlyPrice,
-        location: _locationController.text.trim(),
-        roomType: _selectedRoomType!,
-        description: _descriptionController.text.trim(),
-        images: _imageUrls,
-        videos: _videoUrls,
-        locationCoords: _selectedLocationCoords != null ? {
-          'latitude': _selectedLocationCoords!.latitude,
-          'longitude': _selectedLocationCoords!.longitude,
-          'address': _selectedLocationCoords!.address,
-        }
-        : null,
-      );
+      await ref
+          .read(addRoomViewModelProvider.notifier)
+          .updateRoom(
+            roomId: widget.roomId!,
+            ownerId: ownerId,
+            ownerContactNumber: _contactController.text.trim(),
+            roomTitle: _titleController.text.trim(),
+            monthlyPrice: monthlyPrice,
+            location: _locationController.text.trim(),
+            roomType: _selectedRoomType!,
+            description: _descriptionController.text.trim(),
+            images: _imageUrls,
+            videos: _videoUrls,
+            locationCoords: _selectedLocationCoords != null
+                ? {
+                    'latitude': _selectedLocationCoords!.latitude,
+                    'longitude': _selectedLocationCoords!.longitude,
+                    'address': _selectedLocationCoords!.address,
+                  }
+                : null,
+          );
     } else {
-      await ref.read(addRoomViewModelProvider.notifier).createRoom(
-        ownerId: ownerId,
-        ownerContactNumber: _contactController.text.trim(),
-        roomTitle: _titleController.text.trim(),
-        monthlyPrice: monthlyPrice,
-        location: _locationController.text.trim(),
-        roomType: _selectedRoomType!,
-        description: _descriptionController.text.trim(),
-        images: _imageUrls,
-        videos: _videoUrls,
-        locationCoords: _selectedLocationCoords != null ? {
-          'latitude': _selectedLocationCoords!.latitude,
-          'longitude': _selectedLocationCoords!.longitude,
-          'address': _selectedLocationCoords!.address,
-        } : null,
-      );
+      await ref
+          .read(addRoomViewModelProvider.notifier)
+          .createRoom(
+            ownerId: ownerId,
+            ownerContactNumber: _contactController.text.trim(),
+            roomTitle: _titleController.text.trim(),
+            monthlyPrice: monthlyPrice,
+            location: _locationController.text.trim(),
+            roomType: _selectedRoomType!,
+            description: _descriptionController.text.trim(),
+            images: _imageUrls,
+            videos: _videoUrls,
+            locationCoords: _selectedLocationCoords != null
+                ? {
+                    'latitude': _selectedLocationCoords!.latitude,
+                    'longitude': _selectedLocationCoords!.longitude,
+                    'address': _selectedLocationCoords!.address,
+                  }
+                : null,
+          );
     }
   }
 
@@ -438,9 +491,7 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
       body: Stack(
         children: [
           // Background
-          Container(
-            color: Colors.white,
-          ),
+          Container(color: Colors.white),
           // Content
           SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 80, 16, 0),
@@ -465,19 +516,26 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                     hintText: 'Monthly price ',
                     keyboardType: TextInputType.number,
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d+\.?\d{0,2}'),
+                      ),
                     ],
                     validator: (v) {
                       if (v == null || v.isEmpty) return 'Required';
                       // Remove Rs prefix if present
                       String cleanValue = v.trim();
                       if (cleanValue.startsWith('Rs')) {
-                        cleanValue = cleanValue.replaceFirst(RegExp(r'^Rs\.?\s*'), '');
+                        cleanValue = cleanValue.replaceFirst(
+                          RegExp(r'^Rs\.?\s*'),
+                          '',
+                        );
                       }
                       final price = double.tryParse(cleanValue);
                       if (price == null) return 'Invalid price';
-                      if (price < 1000) return 'Price must be at least Rs. 1,000';
-                      if (price > 1000000) return 'Price cannot exceed Rs. 10,00,000';
+                      if (price < 1000)
+                        return 'Price must be at least Rs. 1,000';
+                      if (price > 1000000)
+                        return 'Price cannot exceed Rs. 10,00,000';
                       return null;
                     },
                   ),
@@ -532,7 +590,9 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                               const SizedBox(height: 8),
                               MyButton(
                                 onPressed: () {
-                                  ref.read(typeViewmodelProvider.notifier).getAllTypes();
+                                  ref
+                                      .read(typeViewmodelProvider.notifier)
+                                      .getAllTypes();
                                 },
                                 text: 'Retry',
                                 color: Colors.red,

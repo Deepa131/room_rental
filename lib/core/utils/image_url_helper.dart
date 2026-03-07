@@ -5,17 +5,29 @@ class ImageUrlHelper {
 
   /// Converts a relative image path to a full URL
   static String getImageUrl(String? imagePath) {
-    if (imagePath == null || imagePath.isEmpty) {
+    if (imagePath == null || imagePath.trim().isEmpty) {
       return '';
     }
 
+    // Normalize slashes because backend paths may contain Windows separators.
+    final normalizedPath = imagePath.trim().replaceAll('\\', '/');
+
     // If it's already a full URL, return as is
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-      return imagePath;
+    if (normalizedPath.startsWith('http://') || normalizedPath.startsWith('https://')) {
+      return normalizedPath;
     }
 
     // Remove leading slashes and construct full URL
-    final cleanPath = imagePath.replaceFirst(RegExp(r'^/+'), '');
+    var cleanPath = normalizedPath.replaceFirst(RegExp(r'^/+'), '');
+
+    // If a known media folder appears later in the path, keep only from that segment.
+    for (final folder in ['room_images/', 'room_videos/', 'profile_pictures/']) {
+      final folderIndex = cleanPath.indexOf(folder);
+      if (folderIndex > 0) {
+        cleanPath = cleanPath.substring(folderIndex);
+        break;
+      }
+    }
 
     // Extract base URL without the /api/ part
     final baseUrl = ApiEndpoints.baseUrl.replaceFirst(RegExp(r'/api/$'), '');
@@ -45,17 +57,19 @@ class ImageUrlHelper {
 
   // Converts a profile picture path to a full URL
   static String getProfilePictureUrl(String? profilePicture) {
-    if (profilePicture == null || profilePicture.isEmpty) {
+    if (profilePicture == null || profilePicture.trim().isEmpty) {
       return '';
     }
 
+    final normalizedPath = profilePicture.trim().replaceAll('\\', '/');
+
     // If it's already a full URL, return as is
-    if (profilePicture.startsWith('http://') || profilePicture.startsWith('https://')) {
-      return profilePicture;
+    if (normalizedPath.startsWith('http://') || normalizedPath.startsWith('https://')) {
+      return normalizedPath;
     }
 
     // Remove leading slashes
-    final cleanPath = profilePicture.replaceFirst(RegExp(r'^/+'), '');
+    final cleanPath = normalizedPath.replaceFirst(RegExp(r'^/+'), '');
 
     // Extract base URL without the /api/ part
     final baseUrl = ApiEndpoints.baseUrl.replaceFirst(RegExp(r'/api/$'), '');

@@ -34,39 +34,41 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
     super.initState();
     _pageController = PageController();
     _buildMediaItems();
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userSession = ref.read(userSessionServiceProvider);
       final userId = userSession.getUserId();
       if (userId != null && userId.isNotEmpty) {
-        ref.read(appointmentViewModelProvider.notifier).getMyAppointments(userId);
+        ref
+            .read(appointmentViewModelProvider.notifier)
+            .getMyAppointments(userId);
       }
     });
   }
 
   void _buildMediaItems() {
     _mediaItems = [];
-    
+
     // Add images
     if (widget.room.images != null) {
       for (final image in widget.room.images!) {
-        _mediaItems.add(MediaItem(
-          type: MediaType.image,
-          url: ImageUrlHelper.getImageUrl(image),
-          filename: image,
-        ));
+        _mediaItems.add(
+          MediaItem(
+            type: MediaType.image,
+            url: ImageUrlHelper.getImageUrl(image),
+            filename: image,
+          ),
+        );
       }
     }
-    
+
     // Add videos
     if (widget.room.videos != null) {
       for (final video in widget.room.videos!) {
         final videoUrl = ImageUrlHelper.getImageUrl(video);
-        _mediaItems.add(MediaItem(
-          type: MediaType.video,
-          url: videoUrl,
-          filename: video,
-        ));
+        _mediaItems.add(
+          MediaItem(type: MediaType.video, url: videoUrl, filename: video),
+        );
       }
     }
   }
@@ -77,9 +79,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
       barrierDismissible: true,
       builder: (context) => Dialog(
         insetPadding: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -93,9 +93,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                   topLeft: Radius.circular(24),
                   topRight: Radius.circular(24),
                 ),
-                border: Border(
-                  bottom: BorderSide(color: Colors.grey[300]!),
-                ),
+                border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
               ),
               child: Row(
                 children: [
@@ -153,7 +151,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                       child: CircularProgressIndicator(),
                     );
                   }
-                  
+
                   final cachedLocation = snapshot.data;
                   if (cachedLocation != null) {
                     return SingleChildScrollView(
@@ -184,10 +182,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                           SizedBox(height: 16),
                           Text(
                             'Please enable location to use navigation',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -206,19 +201,21 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
   void _handleBookAppointment() {
     final userSession = ref.read(userSessionServiceProvider);
     final userId = userSession.getUserId();
-    
+
     final appointments = ref.read(appointmentViewModelProvider).appointments;
     final hasExistingAppointment = appointments.any(
-      (apt) => 
-        apt.roomId == widget.room.roomId && 
-        apt.renterId == userId &&
-        (apt.status == 'pending' || apt.status == 'approved'),
+      (apt) =>
+          apt.roomId == widget.room.roomId &&
+          apt.renterId == userId &&
+          (apt.status == 'pending' || apt.status == 'approved'),
     );
 
     if (hasExistingAppointment) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('You already have an appointment for this room. Check your Appointments tab.'),
+          content: Text(
+            'You already have an appointment for this room. Check your Appointments tab.',
+          ),
           backgroundColor: Colors.orange,
           duration: Duration(seconds: 3),
         ),
@@ -228,40 +225,42 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
 
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => BookAppointmentPage(room: widget.room),
-      ),
+      MaterialPageRoute(builder: (_) => BookAppointmentPage(room: widget.room)),
     );
   }
 
   bool _hasExistingAppointment() {
     final userSession = ref.read(userSessionServiceProvider);
     final userId = userSession.getUserId();
-    
+
     if (userId == null) return false;
-    
+
     final appointments = ref.read(appointmentViewModelProvider).appointments;
     return appointments.any(
-      (apt) => 
-        apt.roomId == widget.room.roomId && 
-        apt.renterId == userId &&
-        (apt.status == 'pending' || apt.status == 'approved'),
+      (apt) =>
+          apt.roomId == widget.room.roomId &&
+          apt.renterId == userId &&
+          (apt.status == 'pending' || apt.status == 'approved'),
     );
   }
 
   String _getAppointmentButtonLabel() {
     final userSession = ref.read(userSessionServiceProvider);
     final userId = userSession.getUserId();
-    
+
     if (userId == null) return 'Book Appointment';
-    
+
     final appointments = ref.read(appointmentViewModelProvider).appointments;
-    final appointment = appointments.where(
-      (apt) => 
-        apt.roomId == widget.room.roomId && 
-        apt.renterId == userId &&
-        (apt.status == 'pending' || apt.status == 'approved' || apt.status == 'rejected'),
-    ).firstOrNull;
+    final appointment = appointments
+        .where(
+          (apt) =>
+              apt.roomId == widget.room.roomId &&
+              apt.renterId == userId &&
+              (apt.status == 'pending' ||
+                  apt.status == 'approved' ||
+                  apt.status == 'rejected'),
+        )
+        .firstOrNull;
 
     if (appointment == null) {
       return 'Book Appointment';
@@ -286,16 +285,20 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
 
     final userSession = ref.read(userSessionServiceProvider);
     final userId = userSession.getUserId();
-    
+
     if (userId == null) return AppColors.primary;
-    
+
     final appointments = ref.read(appointmentViewModelProvider).appointments;
-    final appointment = appointments.where(
-      (apt) => 
-        apt.roomId == widget.room.roomId && 
-        apt.renterId == userId &&
-        (apt.status == 'pending' || apt.status == 'approved' || apt.status == 'rejected'),
-    ).firstOrNull;
+    final appointment = appointments
+        .where(
+          (apt) =>
+              apt.roomId == widget.room.roomId &&
+              apt.renterId == userId &&
+              (apt.status == 'pending' ||
+                  apt.status == 'approved' ||
+                  apt.status == 'rejected'),
+        )
+        .firstOrNull;
 
     if (appointment == null) {
       return AppColors.primary;
@@ -360,7 +363,9 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
               ),
               child: IconButton(
                 icon: Icon(
-                  isInWishlist ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                  isInWishlist
+                      ? Icons.bookmark_rounded
+                      : Icons.bookmark_border_rounded,
                   color: isInWishlist ? Colors.amber : Colors.blue,
                   size: 24,
                 ),
@@ -374,9 +379,9 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            isCurrentlyInWishlist 
-                              ? 'Removed from wishlist' 
-                              : 'Added to wishlist'
+                            isCurrentlyInWishlist
+                                ? 'Removed from wishlist'
+                                : 'Added to wishlist',
                           ),
                           duration: const Duration(seconds: 2),
                         ),
@@ -408,332 +413,351 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
           // Main Content
           SingleChildScrollView(
             child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Media Carousel
-            _buildMediaCarousel(),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Media Carousel
+                _buildMediaCarousel(),
 
-            // Room Info Card
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: context.backgroundColor,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Title and Status
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            widget.room.roomTitle,
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w800,
-                              color: context.textPrimary,
-                              letterSpacing: 0.3,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: widget.room.isAvailable
-                                ? AppColors.foundColor.withAlpha(26)
-                                : AppColors.warning.withAlpha(26),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            widget.room.isAvailable ? 'Available' : 'Rented',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: widget.room.isAvailable
-                                  ? AppColors.foundColor
-                                  : AppColors.warning,
-                            ),
-                          ),
+                // Room Info Card
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: context.backgroundColor,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 2),
-
-                    // Location
-                    Row(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.location_on_rounded,
-                          size: 18,
-                          color: AppColors.primary,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            widget.room.location,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: context.textSecondary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Route Display Widget
-                    if (widget.room.locationCoords != null)
-                      RouteDisplayWidget(
-                        roomLocation: LocationCoords(
-                          latitude: widget.room.locationCoords!.latitude,
-                          longitude: widget.room.locationCoords!.longitude,
-                          address: widget.room.location,
-                        ),
-                        roomAddress: widget.room.location,
-                        userId: ref.read(userSessionServiceProvider).getUserId(),
-                        onShowNavigation: _showNavigationModal,
-                      ),
-                    if (widget.room.locationCoords != null)
-                      const SizedBox(height: 12),
-
-                    // Price
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [AppColors.primary, AppColors.primary.withAlpha(204)],
-                        ),
-                        borderRadius: BorderRadius.circular(14),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withOpacity(0.2),
-                            blurRadius: 12,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Text(
-                            'NPR',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Row(
-                            children: [
-                              Text(
-                                '${widget.room.monthlyPrice.toStringAsFixed(0)}',
-                                style: const TextStyle(
-                                  fontSize: 24,
+                        // Title and Status
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                widget.room.roomTitle,
+                                style: TextStyle(
+                                  fontSize: 22,
                                   fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                  letterSpacing: 0.5,
+                                  color: context.textPrimary,
+                                  letterSpacing: 0.3,
                                 ),
                               ),
-                              const SizedBox(width: 6),
-                              const Text(
-                                '/month',
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: widget.room.isAvailable
+                                    ? AppColors.foundColor.withAlpha(26)
+                                    : AppColors.warning.withAlpha(26),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                widget.room.isAvailable
+                                    ? 'Available'
+                                    : 'Rented',
                                 style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.white70,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: widget.room.isAvailable
+                                      ? AppColors.foundColor
+                                      : AppColors.warning,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+
+                        // Location
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.location_on_rounded,
+                              size: 18,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                widget.room.location,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: context.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Route Display Widget
+                        if (widget.room.locationCoords != null)
+                          RouteDisplayWidget(
+                            roomLocation: LocationCoords(
+                              latitude: widget.room.locationCoords!.latitude,
+                              longitude: widget.room.locationCoords!.longitude,
+                              address: widget.room.location,
+                            ),
+                            roomAddress: widget.room.location,
+                            userId: ref
+                                .read(userSessionServiceProvider)
+                                .getUserId(),
+                            onShowNavigation: _showNavigationModal,
+                          ),
+                        if (widget.room.locationCoords != null)
+                          const SizedBox(height: 12),
+
+                        // Price
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.primary,
+                                AppColors.primary.withAlpha(204),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withOpacity(0.2),
+                                blurRadius: 12,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                'NPR',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Row(
+                                children: [
+                                  Text(
+                                    '${widget.room.monthlyPrice.toStringAsFixed(0)}',
+                                    style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  const Text(
+                                    '/month',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Room Details Grid
+                        _buildDetailsGrid(),
+                        const SizedBox(height: 16),
+
+                        // Description
+                        if (widget.room.description != null &&
+                            widget.room.description!.isNotEmpty)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'About This Room',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: context.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                widget.room.description!,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: context.textSecondary,
+                                  height: 1.6,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                          ),
+
+                        // Contact Owner Section
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withAlpha(13),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: AppColors.primary.withAlpha(50),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Contact Owner',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: context.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                leading: Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        AppColors.primary,
+                                        AppColors.primary.withAlpha(204),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.person,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                ),
+                                title: Text(
+                                  'Room Owner',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: context.textSecondary,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  widget.room.ownerName ?? 'Owner',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: context.textPrimary,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                leading: Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    color: Colors.green[50],
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.green[200]!,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    Icons.phone,
+                                    color: Colors.green[700],
+                                    size: 24,
+                                  ),
+                                ),
+                                title: Text(
+                                  'Phone',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: context.textSecondary,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  widget.room.ownerContactNumber,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: context.textPrimary,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Action Buttons
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Consumer(
+                                builder: (context, ref, child) {
+                                  final appointmentState = ref.watch(
+                                    appointmentViewModelProvider,
+                                  );
+                                  final hasExisting = _hasExistingAppointment();
+                                  final buttonLabel =
+                                      _getAppointmentButtonLabel();
+                                  final buttonColor =
+                                      _getAppointmentButtonColor(hasExisting);
+                                  final isRejected =
+                                      buttonLabel == 'Book Appointment' &&
+                                      hasExisting;
+
+                                  return MyIconButton(
+                                    onPressed: hasExisting && !isRejected
+                                        ? null
+                                        : _handleBookAppointment,
+                                    text: buttonLabel,
+                                    icon: isRejected
+                                        ? Icons.calendar_today_rounded
+                                        : hasExisting
+                                        ? Icons.check_circle_rounded
+                                        : Icons.calendar_today_rounded,
+                                    backgroundColor: hasExisting && !isRejected
+                                        ? buttonColor.withOpacity(0.6)
+                                        : buttonColor,
+                                    foregroundColor: hasExisting && !isRejected
+                                        ? Colors.grey
+                                        : Colors.white,
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
-                    const SizedBox(height: 16),
-
-                    // Room Details Grid
-                    _buildDetailsGrid(),
-                    const SizedBox(height: 16),
-
-                    // Description
-                    if (widget.room.description != null &&
-                        widget.room.description!.isNotEmpty)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'About This Room',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: context.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            widget.room.description!,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: context.textSecondary,
-                              height: 1.6,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                      ),
-
-                    // Contact Owner Section
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withAlpha(13),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: AppColors.primary.withAlpha(50),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Contact Owner',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: context.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [AppColors.primary, AppColors.primary.withAlpha(204)],
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.person,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                            title: Text(
-                              'Room Owner',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: context.textSecondary,
-                              ),
-                            ),
-                            subtitle: Text(
-                              widget.room.ownerName ?? 'Owner',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: context.textPrimary,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                color: Colors.green[50],
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.green[200]!),
-                              ),
-                              child: Icon(
-                                Icons.phone,
-                                color: Colors.green[700],
-                                size: 24,
-                              ),
-                            ),
-                            title: Text(
-                              'Phone',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: context.textSecondary,
-                              ),
-                            ),
-                            subtitle: Text(
-                              widget.room.ownerContactNumber,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: context.textPrimary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Action Buttons
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Consumer(
-                            builder: (context, ref, child) {
-                              final appointmentState = ref.watch(appointmentViewModelProvider);
-                              final hasExisting = _hasExistingAppointment();
-                              final buttonLabel = _getAppointmentButtonLabel();
-                              final buttonColor = _getAppointmentButtonColor(hasExisting);
-                              final isRejected = buttonLabel == 'Book Appointment' && hasExisting;
-                              
-                              return MyIconButton(
-                                onPressed: hasExisting && !isRejected ? null : _handleBookAppointment,
-                                text: buttonLabel,
-                                icon: isRejected
-                                    ? Icons.calendar_today_rounded
-                                    : hasExisting
-                                        ? Icons.check_circle_rounded 
-                                        : Icons.calendar_today_rounded,
-                                backgroundColor: hasExisting && !isRejected
-                                    ? buttonColor.withOpacity(0.6)
-                                    : buttonColor,
-                                foregroundColor: hasExisting && !isRejected
-                                    ? Colors.grey
-                                    : Colors.white,
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
                 ),
-              ),
+                const SizedBox(height: 20),
+              ],
             ),
-            const SizedBox(height: 20),
-
-          ],
-        ),
-      ),
+          ),
         ],
       ),
     );
@@ -765,19 +789,20 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                 itemCount: _mediaItems.length,
                 itemBuilder: (context, index) {
                   final media = _mediaItems[index];
-                  
+
                   if (media.type == MediaType.video) {
+                    if (index != _currentMediaIndex) {
+                      return const _VideoPlaceholder();
+                    }
                     return _InlineVideoPlayer(videoUrl: media.url);
                   }
-                  
+
                   return CachedNetworkImage(
                     imageUrl: media.url,
                     fit: BoxFit.cover,
                     placeholder: (context, url) => Container(
                       color: Colors.grey[200],
-                      child: const Center(
-                        child: CircularProgressIndicator(),
-                      ),
+                      child: const Center(child: CircularProgressIndicator()),
                     ),
                     errorWidget: (context, url, error) => Container(
                       color: Colors.grey[300],
@@ -797,8 +822,13 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.fullscreen, color: Colors.white, size: 22),
-                    onPressed: () => _showFullScreenMedia(_mediaItems[_currentMediaIndex]),
+                    icon: const Icon(
+                      Icons.fullscreen,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                    onPressed: () =>
+                        _showFullScreenMedia(_mediaItems[_currentMediaIndex]),
                     padding: const EdgeInsets.all(8),
                     constraints: const BoxConstraints(),
                   ),
@@ -810,7 +840,10 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                 bottom: 12,
                 left: 12,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withAlpha(204),
                     borderRadius: BorderRadius.circular(20),
@@ -862,11 +895,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
             label: 'Type',
             value: widget.room.roomType.typeName,
           ),
-          Container(
-            width: 1,
-            height: 40,
-            color: context.dividerColor,
-          ),
+          Container(width: 1, height: 40, color: context.dividerColor),
           _buildDetailItem(
             icon: Icons.check_circle_outline,
             label: 'Status',
@@ -888,10 +917,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
         const SizedBox(height: 6),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
-            color: context.textSecondary,
-          ),
+          style: TextStyle(fontSize: 12, color: context.textSecondary),
         ),
         const SizedBox(height: 4),
         Text(
@@ -914,11 +940,7 @@ class MediaItem {
   final String url;
   final String filename;
 
-  MediaItem({
-    required this.type,
-    required this.url,
-    required this.filename,
-  });
+  MediaItem({required this.type, required this.url, required this.filename});
 }
 
 class _InlineVideoPlayer extends StatefulWidget {
@@ -996,7 +1018,7 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
     final hours = duration.inHours;
     final minutes = duration.inMinutes.remainder(60);
     final seconds = duration.inSeconds.remainder(60);
-    
+
     if (hours > 0) {
       return '$hours:${twoDigits(minutes)}:${twoDigits(seconds)}';
     }
@@ -1008,28 +1030,53 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
     if (_hasError) {
       return Container(
         color: Colors.black,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(24),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, color: Colors.red, size: 48),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.videocam_off,
+                  color: Colors.red,
+                  size: 48,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Video Not Available',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: 8),
               const Text(
-                'Failed to load video',
-                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'URL: ${widget.videoUrl}',
-                style: const TextStyle(color: Colors.white70, fontSize: 10),
+                'This video format is not supported on your device',
+                style: TextStyle(color: Colors.white70, fontSize: 13),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 4),
-              Text(
-                _errorMessage,
-                style: const TextStyle(color: Colors.white60, fontSize: 10),
-                textAlign: TextAlign.center,
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'Please contact the room owner for details',
+                  style: TextStyle(color: Colors.white60, fontSize: 11),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ],
           ),
@@ -1041,9 +1088,7 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
       return Container(
         color: Colors.black,
         child: const Center(
-          child: CircularProgressIndicator(
-            color: Colors.white,
-          ),
+          child: CircularProgressIndicator(color: Colors.white),
         ),
       );
     }
@@ -1086,7 +1131,11 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
-                          const Icon(Icons.videocam, color: Colors.white, size: 20),
+                          const Icon(
+                            Icons.videocam,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -1105,7 +1154,10 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
                     ),
                     // Controls
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       child: Column(
                         children: [
                           // Progress bar
@@ -1217,6 +1269,7 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
     );
   }
 }
+
 class _FullScreenMediaViewer extends StatefulWidget {
   final MediaItem media;
   final List<MediaItem> allMedia;
@@ -1276,6 +1329,9 @@ class _FullScreenMediaViewerState extends State<_FullScreenMediaViewer> {
           final media = widget.allMedia[index];
 
           if (media.type == MediaType.video) {
+            if (index != _currentIndex) {
+              return const _VideoPlaceholder();
+            }
             return _FullScreenVideoPlayer(videoUrl: media.url);
           }
 
@@ -1289,7 +1345,11 @@ class _FullScreenMediaViewerState extends State<_FullScreenMediaViewer> {
                   child: CircularProgressIndicator(color: Colors.white),
                 ),
                 errorWidget: (context, url, error) => const Center(
-                  child: Icon(Icons.broken_image, size: 48, color: Colors.white),
+                  child: Icon(
+                    Icons.broken_image,
+                    size: 48,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
@@ -1370,16 +1430,40 @@ class _FullScreenVideoPlayerState extends State<_FullScreenVideoPlayer> {
   Widget build(BuildContext context) {
     if (_hasError) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error, color: Colors.red, size: 48),
-            const SizedBox(height: 16),
-            Text(
-              'Error loading video',
-              style: const TextStyle(color: Colors.white),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.videocam_off,
+                  color: Colors.red,
+                  size: 56,
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Video Not Available',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'This video format is not supported on your device',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -1449,12 +1533,18 @@ class _FullScreenVideoPlayerState extends State<_FullScreenVideoPlayer> {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(2),
                             child: LinearProgressIndicator(
-                              value: _controller.value.duration.inMilliseconds > 0
+                              value:
+                                  _controller.value.duration.inMilliseconds > 0
                                   ? _controller.value.position.inMilliseconds /
-                                      _controller.value.duration.inMilliseconds
+                                        _controller
+                                            .value
+                                            .duration
+                                            .inMilliseconds
                                   : 0,
                               backgroundColor: Colors.white.withAlpha(77),
-                              valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                              valueColor: AlwaysStoppedAnimation(
+                                AppColors.primary,
+                              ),
                               minHeight: 3,
                             ),
                           ),
@@ -1526,6 +1616,30 @@ class _FullScreenVideoPlayerState extends State<_FullScreenVideoPlayer> {
                   size: 48,
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _VideoPlaceholder extends StatelessWidget {
+  const _VideoPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black,
+      child: const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.play_circle_outline, color: Colors.white70, size: 64),
+            SizedBox(height: 8),
+            Text(
+              'Swipe here to load video',
+              style: TextStyle(color: Colors.white70, fontSize: 13),
+            ),
           ],
         ),
       ),
